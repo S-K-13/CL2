@@ -1,0 +1,435 @@
+
+# Practical 2: Quantum Teleportation Algorithm
+
+
+# Step 1: Install required libraries
+
+# Jupyter Notebook (DEFAULT)
+%pip install qiskit qiskit-aer matplotlib pylatexenc
+
+# Google Colab (ALTERNATIVE)
+# !pip install qiskit qiskit-aer matplotlib pylatexenc
+
+
+# Step 2: Import required libraries
+from qiskit import QuantumCircuit
+from qiskit_aer import AerSimulator
+from qiskit.visualization import plot_histogram
+from IPython.display import display
+
+
+# Step 3: Create a quantum circuit with 3 qubits and 3 classical bits
+circuit = QuantumCircuit(3, 3)
+
+
+# Step 4: Apply X gate on qubit 0
+# This initializes qubit 0 in state |1>
+circuit.x(0)
+
+# Add barrier to separate operations
+circuit.barrier()
+
+
+# Step 5: Create entanglement between qubits 1 and 2
+
+# Apply Hadamard gate on qubit 1
+circuit.h(1)
+
+# Apply CNOT gate between qubits 1 and 2
+circuit.cx(1, 2)
+
+
+# Step 6: Apply CNOT gate between qubits 0 and 1
+circuit.cx(0, 1)
+
+# Apply Hadamard gate on qubit 0
+circuit.h(0)
+
+# Add barrier
+circuit.barrier()
+
+
+# Step 7: Measure qubits 0 and 1
+# Store results in classical bits 0 and 1
+circuit.measure([0, 1], [0, 1])
+
+
+# Step 8: Apply correction gates to qubit 2
+
+# Add barrier before correction operations
+circuit.barrier()
+
+# Apply controlled X gate
+circuit.cx(1, 2)
+
+# Apply controlled Z gate
+circuit.cz(0, 2)
+
+
+# Step 9: Measure qubit 2
+circuit.measure(2, 2)
+
+
+# Step 10: Display the quantum circuit
+display(circuit.draw(output='mpl'))
+
+# Display quantum circuit in plain text format
+print(circuit.draw())
+
+# Step 11: Initialize the quantum simulator
+simulator = AerSimulator()
+
+
+# Step 12: Execute the circuit with 1000 shots
+job = simulator.run(circuit, shots=1000)
+
+# Get the execution result
+result = job.result()
+
+# Extract measurement counts
+counts = result.get_counts(circuit)
+
+
+# Step 13: Display the measurement results
+print("Quantum Teleportation Results:")
+print(counts)
+
+
+# Step 14: Display the histogram
+display(plot_histogram(counts))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////
+
+
+# PRACTICAL NO. 2: QUANTUM TELEPORTATION ALGORITHM
+
+## 1. Aim
+
+- To implement the Quantum Teleportation algorithm using Python and Qiskit.
+- The program transfers a quantum state from one qubit to another using entanglement, quantum gates and measurement.
+
+## 2. Objectives
+
+1. Understand Quantum Teleportation Algorithm: Learn how quantum information can be transferred between qubits.
+2. Create Quantum Circuit: Construct a circuit using three qubits and three classical bits.
+3. Understand Entanglement: Create a Bell pair using Hadamard and CNOT gates.
+
+## 3. Theory and Important Quantum Concepts
+
+1. Quantum Teleportation:
+   - It is a process of transferring an unknown quantum state from one qubit to another using entanglement and classical measurement results.
+   - The original state is not physically transported, and the sender cannot retain a copy of it.
+
+2. Qubit:
+   - A qubit is the basic unit of quantum information.
+   - It can exist in state |0>, |1>, or a superposition of both.
+
+3. Quantum Entanglement:
+   - Entanglement is a quantum phenomenon in which two qubits become strongly correlated.
+   - Measuring one entangled qubit provides information about the other qubit.
+
+4. Bell State:
+   - A Bell state is a maximally entangled two-qubit state.
+   - It is created using a Hadamard gate followed by a CNOT gate.
+
+   Formula:
+
+   |Φ+> = (|00> + |11>) / √2
+
+5. Superposition:
+   - A qubit exists as a combination of |0> and |1> until measurement.
+   - The Hadamard gate is used to create superposition.
+
+6. No-Cloning Theorem:
+   - It states that an arbitrary unknown quantum state cannot be copied perfectly.
+   - Quantum teleportation transfers the state without creating a duplicate.
+
+7. Quantum Measurement:
+   - Measurement converts quantum information into classical information.
+   - It collapses a qubit into either |0> or |1>.
+
+8. Classical Communication:
+   - The sender measures two qubits and obtains two classical bits.
+   - These measurement results are used to apply correction operations to the receiver's qubit.
+
+## 4. Code Explanation
+
+### Step 1: Install Required Libraries
+
+- `qiskit`: Used to create quantum circuits.
+- `qiskit-aer`: Provides quantum simulators.
+- `matplotlib`: Used for graphical visualization.
+- `pylatexenc`: Helps render quantum circuit diagrams.
+
+Note: `%pip` is used in Jupyter Notebook, while `!pip` is the alternative for Google Colab.
+
+### Step 2: Import Required Libraries
+
+- `QuantumCircuit`: Creates the quantum circuit.
+- `AerSimulator`: Simulates the quantum circuit locally.
+- `plot_histogram`: Displays measurement results as a histogram.
+- `display`: Displays graphical outputs in Jupyter Notebook.
+
+### Step 3: Create Quantum Circuit
+
+- `circuit = QuantumCircuit(3, 3)` creates a circuit with 3 qubits and 3 classical bits.
+- Qubit 0 represents the state to be teleported.
+- Qubit 1 is used to create entanglement.
+- Qubit 2 receives the teleported state.
+- Classical bits store measurement results.
+
+### Step 4: Initialize Qubit 0 Using X Gate
+
+- `circuit.x(0)` applies the Pauli-X gate to qubit 0.
+- It changes the initial state from |0> to |1>.
+- This initializes the quantum state that will be teleported.
+- `circuit.barrier()` separates circuit operations for better visualization.
+
+### Step 5: Create Entanglement Between Qubits 1 and 2
+
+- `circuit.h(1)` applies a Hadamard gate to qubit 1.
+- `circuit.cx(1, 2)` applies a CNOT gate with qubit 1 as control and qubit 2 as target.
+- These operations create an entangled Bell pair between qubits 1 and 2.
+
+### Step 6: Apply CNOT and Hadamard Gates
+
+- `circuit.cx(0, 1)` applies a CNOT gate between qubits 0 and 1.
+- `circuit.h(0)` applies a Hadamard gate to qubit 0.
+- These operations prepare the circuit for the teleportation measurements.
+- A barrier separates these operations from the next stage.
+
+### Step 7: Measure Qubits 0 and 1
+
+- `circuit.measure([0, 1], [0, 1])` measures qubits 0 and 1.
+- Their measurement results are stored in classical bits 0 and 1.
+- These two measurement outcomes determine the correction operations.
+
+### Step 8: Apply Correction Gates to Qubit 2
+
+- `circuit.cx(1, 2)` applies a controlled-X gate.
+- `circuit.cz(0, 2)` applies a controlled-Z gate.
+- These gates use the measured qubits as controls to correct the state of qubit 2.
+- This allows qubit 2 to recover the original state.
+
+### Step 9: Measure Qubit 2
+
+- `circuit.measure(2, 2)` measures the receiver's qubit.
+- The result is stored in classical bit 2.
+- This allows us to verify the final teleported state.
+
+### Step 10: Display the Quantum Circuit
+
+- `circuit.draw(output='mpl')` generates the graphical circuit diagram.
+- `display()` displays the diagram.
+- `print(circuit.draw())` displays the circuit in text format.
+
+### Step 11: Initialize Quantum Simulator
+
+- `simulator = AerSimulator()` initializes a local quantum simulator.
+- It executes the circuit without requiring a physical quantum computer.
+
+### Step 12: Execute the Circuit
+
+- `simulator.run(circuit, shots=1000)` executes the circuit 1000 times.
+- `job.result()` retrieves the execution results.
+- `result.get_counts(circuit)` extracts the measurement outcomes and their frequencies.
+
+### Step 13: Display Measurement Results
+
+- `print(counts)` displays the measurement outcomes and their frequencies.
+- Each binary string represents the measured classical bits.
+
+### Step 14: Display Histogram
+
+- `plot_histogram(counts)` generates a histogram of measurement results.
+- `display()` displays the histogram.
+- It helps visualize the frequency of different measurement outcomes.
+
+## 5. Functions and Libraries Used
+
+| Function | Purpose |
+|---|---|
+| `QuantumCircuit(3, 3)` | Creates a circuit with 3 qubits and 3 classical bits. |
+| `circuit.x()` | Applies Pauli-X gate. |
+| `circuit.h()` | Applies Hadamard gate. |
+| `circuit.cx()` | Applies controlled-X gate. |
+| `circuit.cz()` | Applies controlled-Z gate. |
+| `circuit.barrier()` | Separates circuit operations visually. |
+| `circuit.measure()` | Measures qubits and stores results. |
+| `circuit.draw()` | Generates circuit representation. |
+| `AerSimulator()` | Initializes a local quantum simulator. |
+| `simulator.run()` | Executes the circuit. |
+| `job.result()` | Retrieves execution results. |
+| `get_counts()` | Returns measurement outcomes and frequencies. |
+| `plot_histogram()` | Displays measurement results graphically. |
+
+Important Parameters:
+
+- `QuantumCircuit(3, 3)`: Creates 3 quantum bits and 3 classical bits.
+- `cx(0, 1)`: First argument is the control qubit and second is the target qubit.
+- `measure([0, 1], [0, 1])`: Maps qubits 0 and 1 to classical bits 0 and 1.
+- `shots=1000`: Executes the circuit 1000 times.
+
+## 6. Quantum Gates and Operations Used
+
+### 1. Pauli-X Gate (X)
+
+- Acts like a quantum NOT gate.
+- Converts |0> into |1> and |1> into |0>.
+
+Matrix:
+
+X = [[0, 1], [1, 0]]
+
+Used to initialize qubit 0 in state |1>.
+
+### 2. Hadamard Gate (H)
+
+- Creates superposition in a qubit.
+- Converts |0> into |+>.
+
+Matrix:
+
+H = 1/√2 × [[1, 1], [1, -1]]
+
+Used to create entanglement and prepare qubit 0 for measurement.
+
+### 3. CNOT Gate (CX)
+
+- A two-qubit controlled gate.
+- Flips the target qubit when the control qubit is |1>.
+
+Used to create the Bell pair and perform correction on qubit 2.
+
+### 4. Controlled-Z Gate (CZ)
+
+- Applies a phase flip when both control and target qubits are |1>.
+- Changes the phase of the |11> component.
+
+Used to perform the final correction on qubit 2.
+
+### 5. Measurement
+
+- Converts quantum states into classical bits.
+- Used to obtain the teleportation measurement results.
+
+## 7. Program Logic and Execution Flow
+
+1. Start the program.
+2. Install and import required libraries.
+3. Create a circuit with 3 qubits and 3 classical bits.
+4. Apply an X gate to qubit 0 to initialize it in |1>.
+5. Apply a Hadamard gate to qubit 1.
+6. Apply a CNOT gate between qubits 1 and 2 to create entanglement.
+7. Apply CNOT and Hadamard gates to qubits 0 and 1.
+8. Measure qubits 0 and 1.
+9. Apply controlled-X and controlled-Z correction gates to qubit 2.
+10. Measure qubit 2.
+11. Display the quantum circuit.
+12. Initialize the Aer simulator.
+13. Execute the circuit using 1000 shots.
+14. Retrieve and display measurement counts.
+15. Plot the measurement histogram.
+16. Stop the program.
+
+## 8. Output Explanation
+
+### 1. Quantum Circuit Diagram
+
+- The circuit contains three quantum wires and three classical wires.
+- X, H, CX and CZ gates represent the quantum operations.
+- Measurement symbols show the transfer of results into classical bits.
+- Barriers separate different stages of teleportation.
+
+### 2. Measurement Results
+
+- The `counts` variable displays the measurement outcomes and their frequencies.
+- Each outcome contains three classical bits.
+- Since Qiskit displays classical bit 2 on the left, the bitstring is generally ordered as c2 c1 c0.
+
+Example output (illustrative):
+
+    Quantum Teleportation Results:
+    {'100': 245, '110': 255, '101': 248, '111': 252}
+
+Note: Actual counts may vary slightly between executions.
+
+### 3. Histogram
+
+- The histogram displays the frequency of different measurement outcomes.
+- The first two measured bits have four possible combinations.
+- Since the original state is |1>, the receiver's qubit should ideally also be measured as |1>.
+- Therefore, the displayed three-bit outcomes should begin with 1 in Qiskit's bitstring ordering.
+
+### 4. Important Observation
+
+- The program teleports the initialized state |1> from qubit 0 to qubit 2.
+- The measurement outcomes of qubits 0 and 1 may vary.
+- After correction, qubit 2 recovers the original state |1>.
+
+## 9. Achievement of Objectives
+
+1. Understand Quantum Teleportation Algorithm:
+   - Achieved by transferring the initialized quantum state from qubit 0 to qubit 2 using entanglement and measurement.
+
+2. Create Quantum Circuit:
+   - Achieved by creating a circuit containing three qubits and three classical bits.
+
+3. Understand Entanglement:
+   - Achieved by applying Hadamard and CNOT gates to create a Bell pair between qubits 1 and 2.
+
+## 10. Important Viva Questions and Answers
+
+Q1. What is quantum teleportation?
+
+It is the process of transferring a quantum state from one qubit to another using entanglement and classical communication.
+
+Q2. What is quantum entanglement?
+
+It is a phenomenon in which two or more qubits become strongly correlated with each other.
+
+Q3. What is a Bell pair?
+
+A Bell pair is a maximally entangled pair of two qubits.
+
+Q4. Which gates are used in quantum teleportation?
+
+Hadamard, Pauli-X, CNOT and Controlled-Z gates are used in this implementation.
+
+Q5. Why is a Hadamard gate used?
+
+It creates superposition, which helps in generating entanglement and performing teleportation.
+
+Q6. What is the purpose of a CNOT gate?
+
+It flips the target qubit when the control qubit is in state |1>.
+
+Q7. Why are two qubits measured during teleportation?
+
+Their measurement results determine the correction operations required on the receiver's qubit.
+
+Q8. What is the no-cloning theorem?
+
+It states that an arbitrary unknown quantum state cannot be copied perfectly.
+
+Q9. Why are correction gates required?
+
+They correct the receiver's qubit so that it recovers the original quantum state.
+
+Q10. What is the purpose of shots=1000?
+
+It executes the circuit 1000 times to collect measurement statistics.

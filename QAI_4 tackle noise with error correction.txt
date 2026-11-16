@@ -1,0 +1,438 @@
+
+# Practical 4: Tackle Noise with Error Correction
+
+# Step 1: Install required libraries
+%pip install qiskit qiskit-aer matplotlib pylatexenc numpy
+
+# Google Colab alternative:
+# !pip install qiskit qiskit-aer matplotlib pylatexenc numpy
+
+
+# Step 2: Import required libraries
+import numpy as np
+from qiskit import QuantumCircuit, transpile
+from qiskit_aer import AerSimulator
+from qiskit.visualization import plot_histogram
+from IPython.display import display
+
+
+# Step 3: Define the quantum circuit
+qc = QuantumCircuit(3, 3)
+
+qc.h(0)
+qc.cx(0, 1)
+qc.cz(0, 2)
+
+qc.measure([0, 1, 2], [0, 1, 2])
+
+
+# Step 4: Display the quantum circuit
+display(qc.draw(output='mpl'))
+
+# Display circuit in text format
+print(qc.draw())
+
+
+# Step 5: Create the simulator
+backend = AerSimulator()
+
+
+# Step 6: Transpile and simulate the original circuit
+transpiled_qc = transpile(qc, backend)
+
+job = backend.run(transpiled_qc, shots=1000)
+
+result = job.result()
+
+counts = result.get_counts()
+
+
+# Step 7: Create calibration circuits
+calibration_circuits = []
+
+for state in range(8):
+
+    cal_circuit = QuantumCircuit(3, 3)
+
+    # Prepare the required basis state
+    for qubit in range(3):
+        if (state >> qubit) & 1:
+            cal_circuit.x(qubit)
+
+    # Measure all three qubits
+    cal_circuit.measure([0, 1, 2], [0, 1, 2])
+
+    calibration_circuits.append(cal_circuit)
+
+
+# Step 8: Run the calibration circuits
+transpiled_calibrations = transpile(calibration_circuits, backend)
+
+cal_job = backend.run(transpiled_calibrations, shots=1000)
+
+cal_results = cal_job.result()
+
+
+# Step 9: Create the measurement calibration matrix
+calibration_matrix = np.zeros((8, 8))
+
+for state in range(8):
+
+    cal_counts = cal_results.get_counts(state)
+
+    # Store the measurement probabilities
+    for measured_state, count in cal_counts.items():
+
+        measured_value = int(measured_state, 2)
+
+        calibration_matrix[measured_value, state] = count / 1000
+
+
+# Step 10: Apply measurement error mitigation
+measured_probabilities = np.zeros(8)
+
+for state, count in counts.items():
+
+    measured_value = int(state, 2)
+
+    measured_probabilities[measured_value] = count / 1000
+
+# Correct the measurement probabilities
+mitigated_probabilities = np.linalg.solve(
+    calibration_matrix, measured_probabilities
+)
+
+# Remove negative probabilities
+mitigated_probabilities = np.clip(mitigated_probabilities, 0, None)
+
+# Normalize the probabilities
+mitigated_probabilities = (
+    mitigated_probabilities / np.sum(mitigated_probabilities)
+)
+
+
+# Step 11: Convert probabilities into counts
+mitigated_counts = {}
+
+for state in range(8):
+
+    binary_state = format(state, '03b')
+
+    mitigated_counts[binary_state] = mitigated_probabilities[state] * 1000
+
+
+# Step 12: Print original counts
+print("Original counts:")
+print(counts)
+
+
+# Step 13: Print mitigated counts
+print("\nMitigated counts:")
+print(mitigated_counts)
+
+
+# Step 14: Display original and mitigated histograms
+plot_histogram(
+    [counts, mitigated_counts],
+    legend=['Original', 'Mitigated']
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+///////////////////////////////////////////////////
+
+# PRACTICAL NO. 4: TACKLE NOISE WITH ERROR CORRECTION
+
+## 1. Aim
+
+- To understand how quantum noise can be handled using error correction techniques.
+- The program uses measurement calibration and error mitigation to improve the reliability of quantum measurement results.
+
+## 2. Objectives
+
+1. Understand Quantum Error Correction: Learn how errors in quantum systems can be identified and reduced.
+2. Measurement Error Mitigation: Use calibration circuits to estimate measurement errors and correct the measured probabilities.
+
+## 3. Theory and Important Quantum Concepts
+
+1. Quantum Noise:
+   - Quantum noise refers to unwanted disturbances that affect quantum states and operations.
+   - It can occur due to environmental interactions, faulty gates and measurement errors.
+
+2. Quantum Error Correction (QEC):
+   - QEC is a technique used to detect and correct errors in quantum information.
+   - It uses multiple physical qubits to protect one logical qubit.
+
+3. Measurement Error:
+   - Measurement errors occur when a qubit is measured incorrectly.
+   - For example, |0> may be incorrectly recorded as 1.
+
+4. Error Mitigation:
+   - Error mitigation reduces the effect of errors using calibration and mathematical correction.
+   - Unlike error correction, it does not necessarily detect and correct errors during computation.
+
+5. Calibration:
+   - Calibration involves preparing known quantum states and measuring them.
+   - The results are used to estimate the probability of incorrect measurements.
+
+6. Calibration Matrix:
+   - A calibration matrix represents the relationship between prepared states and measured outcomes.
+   - It is used to correct measurement probabilities mathematically.
+
+7. Quantum Measurement:
+   - Measurement converts quantum states into classical bits.
+   - For 3 qubits, there are 8 possible measurement outcomes.
+
+   Total states = 2^3 = 8
+
+## 4. Code Explanation
+
+### Step 1: Install Required Libraries
+
+- `qiskit`: Used to create quantum circuits.
+- `qiskit-aer`: Provides quantum simulators.
+- `matplotlib`: Used for graphical visualization.
+- `pylatexenc`: Helps render quantum circuit diagrams.
+- `numpy`: Used for matrix operations and numerical calculations.
+
+### Step 2: Import Required Libraries
+
+- `numpy`: Performs mathematical and matrix operations.
+- `QuantumCircuit`: Creates quantum circuits.
+- `transpile`: Converts circuits into simulator-compatible instructions.
+- `AerSimulator`: Simulates quantum circuits locally.
+- `plot_histogram`: Displays measurement results graphically.
+- `display`: Displays circuit diagrams and plots.
+
+### Step 3: Define the Quantum Circuit
+
+- `qc = QuantumCircuit(3, 3)` creates a circuit with 3 qubits and 3 classical bits.
+- `qc.h(0)` applies a Hadamard gate to qubit 0 to create superposition.
+- `qc.cx(0, 1)` applies a CNOT gate between qubits 0 and 1.
+- `qc.cz(0, 2)` applies a Controlled-Z gate between qubits 0 and 2.
+- `qc.measure()` measures all three qubits and stores the results in classical bits.
+
+### Step 4: Display the Quantum Circuit
+
+- `qc.draw(output='mpl')` generates the graphical circuit diagram.
+- `display()` displays the circuit.
+- `print(qc.draw())` displays the circuit in text format.
+
+### Step 5: Create the Simulator
+
+- `backend = AerSimulator()` initializes a local quantum simulator.
+- It allows the circuit to execute without a physical quantum computer.
+
+### Step 6: Simulate the Original Circuit
+
+- `transpile(qc, backend)` converts the circuit into simulator-compatible instructions.
+- `backend.run(transpiled_qc, shots=1000)` executes the circuit 1000 times.
+- `job.result()` retrieves the execution results.
+- `get_counts()` extracts the original measurement counts.
+
+### Step 7: Create Calibration Circuits
+
+- `calibration_circuits = []` creates an empty list to store calibration circuits.
+- The loop runs 8 times to generate all possible 3-qubit basis states.
+- `QuantumCircuit(3, 3)` creates a separate circuit for each state.
+- `state >> qubit` and `& 1` check whether the corresponding binary bit is 1.
+- `cal_circuit.x(qubit)` applies an X gate when required to prepare the desired state.
+- `cal_circuit.measure()` measures all three qubits.
+- `append()` stores each calibration circuit in the list.
+
+### Step 8: Run the Calibration Circuits
+
+- `transpile(calibration_circuits, backend)` converts all calibration circuits for simulation.
+- `backend.run(..., shots=1000)` executes each calibration circuit 1000 times.
+- `cal_job.result()` retrieves their measurement results.
+
+### Step 9: Create the Measurement Calibration Matrix
+
+- `np.zeros((8, 8))` creates an 8 × 8 matrix initialized with zeros.
+- The loop retrieves measurement results for each prepared state.
+- `get_counts(state)` extracts the measurement counts.
+- `int(measured_state, 2)` converts the binary measurement result into an integer.
+- `count / 1000` calculates the measurement probability.
+- These probabilities are stored in the calibration matrix.
+
+### Step 10: Apply Measurement Error Mitigation
+
+- `np.zeros(8)` creates an array to store the original measurement probabilities.
+- The loop converts measurement counts into probabilities.
+- `np.linalg.solve()` solves the calibration matrix equation to estimate corrected probabilities.
+- `np.clip()` removes negative probability values.
+- Normalization ensures that all corrected probabilities add up to 1.
+
+### Step 11: Convert Probabilities into Counts
+
+- `format(state, '03b')` converts each integer into a 3-bit binary string.
+- The corrected probabilities are multiplied by 1000 to obtain mitigated counts.
+- Results are stored in the `mitigated_counts` dictionary.
+
+### Step 12: Print Original Counts
+
+- Displays the measurement counts obtained before error mitigation.
+
+### Step 13: Print Mitigated Counts
+
+- Displays the corrected measurement counts after applying calibration-based mitigation.
+
+### Step 14: Display Original and Mitigated Histograms
+
+- `plot_histogram()` displays two histograms.
+- The first represents original measurement counts.
+- The second represents mitigated measurement counts.
+- This helps compare the results before and after mitigation.
+
+## 5. Functions and Libraries Used
+
+| Function | Purpose |
+|---|---|
+| `QuantumCircuit()` | Creates a quantum circuit. |
+| `qc.h()` | Applies Hadamard gate. |
+| `qc.cx()` | Applies CNOT gate. |
+| `qc.cz()` | Applies Controlled-Z gate. |
+| `qc.measure()` | Measures qubits. |
+| `transpile()` | Converts circuits for the simulator. |
+| `AerSimulator()` | Initializes a local simulator. |
+| `backend.run()` | Executes quantum circuits. |
+| `get_counts()` | Retrieves measurement counts. |
+| `np.zeros()` | Creates arrays or matrices initialized with zeros. |
+| `np.linalg.solve()` | Solves a system of linear equations. |
+| `np.clip()` | Restricts values to a specified range. |
+| `format()` | Converts integers into binary strings. |
+| `plot_histogram()` | Displays measurement results graphically. |
+
+Important Parameters:
+
+- `QuantumCircuit(3, 3)`: Creates 3 qubits and 3 classical bits.
+- `shots=1000`: Executes each circuit 1000 times.
+- `np.zeros((8, 8))`: Creates an 8 × 8 calibration matrix.
+- `format(state, '03b')`: Converts a number into a 3-bit binary string.
+
+## 6. Quantum Gates and Operations Used
+
+### 1. Hadamard Gate (H)
+
+- Creates superposition in a qubit.
+- Converts |0> into (|0> + |1>) / √2.
+
+### 2. CNOT Gate (CX)
+
+- A controlled gate that flips the target qubit when the control qubit is 1.
+- Used to create correlations between qubits.
+
+### 3. Controlled-Z Gate (CZ)
+
+- Applies a phase flip when both qubits are in state |1>.
+- Used as a two-qubit controlled phase operation.
+
+### 4. Measurement
+
+- Converts quantum states into classical bits.
+- Used to obtain measurement outcomes for calibration and analysis.
+
+## 7. Program Logic and Execution Flow
+
+1. Start the program.
+2. Install and import required libraries.
+3. Create a quantum circuit with 3 qubits.
+4. Apply Hadamard, CNOT and Controlled-Z gates.
+5. Measure all qubits.
+6. Display the quantum circuit.
+7. Initialize the Aer simulator.
+8. Execute the original circuit using 1000 shots.
+9. Generate 8 calibration circuits for all possible basis states.
+10. Execute the calibration circuits.
+11. Construct the 8 × 8 calibration matrix.
+12. Calculate original measurement probabilities.
+13. Apply mathematical error mitigation.
+14. Normalize corrected probabilities.
+15. Convert corrected probabilities into counts.
+16. Display original and mitigated counts.
+17. Plot both histograms.
+18. Stop the program.
+
+## 8. Output Explanation
+
+1. Quantum Circuit:
+   - Displays three qubits with Hadamard, CNOT and Controlled-Z gates.
+   - Measurement operations store results in classical bits.
+
+2. Original Counts:
+   - Displays measurement outcomes obtained from the original circuit.
+   - Each outcome represents a 3-bit binary state.
+
+3. Mitigated Counts:
+   - Displays measurement counts after applying the calibration matrix.
+   - These values represent the estimated corrected measurement probabilities multiplied by 1000.
+
+4. Histogram:
+   - Displays original and mitigated measurement results side by side.
+   - Helps compare the measurement distributions before and after mitigation.
+
+5. Important Observations:
+   - Eight calibration circuits are generated for three qubits.
+   - The calibration matrix has dimensions 8 × 8.
+   - Corrected probabilities are normalized to sum to 1.
+   - Actual results may vary due to measurement statistics.
+
+## 9. Achievement of Objectives
+
+1. Understand Quantum Error Correction:
+   - The practical introduces quantum noise and techniques for improving measurement reliability.
+
+2. Measurement Error Mitigation:
+   - Achieved by generating calibration circuits, constructing a calibration matrix and correcting measurement probabilities.
+
+## 10. Important Viva Questions and Answers
+
+Q1. What is quantum noise?
+
+Quantum noise refers to unwanted disturbances that affect quantum states and operations.
+
+Q2. What is Quantum Error Correction?
+
+QEC is a technique that uses multiple physical qubits to detect and correct errors in quantum information.
+
+Q3. What is error mitigation?
+
+It is a technique that reduces the effect of errors using mathematical correction methods.
+
+Q4. What is a calibration circuit?
+
+It is a circuit that prepares a known quantum state to estimate measurement errors.
+
+Q5. What is a calibration matrix?
+
+It is a matrix containing probabilities of measuring different outcomes for known prepared states.
+
+Q6. Why are 8 calibration circuits generated?
+
+Because three qubits have 2^3 = 8 possible computational basis states.
+
+Q7. What is the purpose of NumPy?
+
+NumPy performs numerical calculations and matrix operations.
+
+Q8. What is the purpose of np.linalg.solve()?
+
+It solves a system of linear equations to calculate corrected measurement probabilities.
+
+Q9. What is the difference between error correction and error mitigation?
+
+Error correction detects and corrects errors using additional quantum resources, whereas error mitigation reduces their effects using techniques such as calibration.
+
+Q10. Why are histograms used?
+
+Histograms help compare the original and mitigated measurement distributions.

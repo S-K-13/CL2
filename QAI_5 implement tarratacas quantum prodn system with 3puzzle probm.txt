@@ -1,0 +1,414 @@
+
+# Practical 5: Implement Tarrataca's Quantum Production System
+# with the 3-Puzzle Problem
+
+# Step 1: Install required libraries
+%pip install qiskit qiskit-aer matplotlib pylatexenc
+
+# Google Colab alternative:
+# !pip install qiskit qiskit-aer matplotlib pylatexenc
+
+
+# Step 2: Import required libraries
+from qiskit import QuantumCircuit, transpile
+from qiskit_aer import AerSimulator
+from IPython.display import display
+
+
+# Step 3: Define the initial state and goal state
+initial_state = [2, 5, 3, 1, 8, 6, 4, 7, None]
+
+goal_state = [1, 2, 3, 4, 5, 6, 7, 8, None]
+
+
+# Step 4: Define the quantum circuit
+qc = QuantumCircuit(18, 18)
+
+
+# Step 5: Initialize the circuit with the initial state
+for i, tile in enumerate(initial_state):
+
+    if tile is not None:
+        qc.x(i)
+
+
+# Step 6: Perform swaps to reach the goal state
+for i, tile in enumerate(goal_state):
+
+    if tile is not None:
+
+        initial_index = initial_state.index(tile)
+
+        target_index = goal_state.index(tile)
+
+        qc.swap(i, initial_index + 9)
+
+        qc.swap(i, target_index + 9)
+
+
+# Step 7: Measure the final state
+qc.measure(range(9), range(9))
+
+
+# Step 8: Display the quantum circuit
+display(qc.draw(output='mpl'))
+
+# Display circuit in text format
+print(qc.draw())
+
+
+# Step 9: Simulate the circuit
+backend = AerSimulator()
+
+transpiled_qc = transpile(qc, backend)
+
+job = backend.run(transpiled_qc, shots=1024)
+
+result = job.result()
+
+
+# Step 10: Get measurement results
+counts = result.get_counts(transpiled_qc)
+
+
+# Step 11: Find the most probable state
+max_count = max(counts.values())
+
+solution = [
+    state for state, count in counts.items()
+    if count == max_count
+][0]
+
+
+# Step 12: Print the results
+print("Measurement Results:")
+print(counts)
+
+print("\nMost Probable State:")
+print(solution)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+///////////////////////////////////////////////////
+
+# PRACTICAL NO. 5: IMPLEMENT TARRATACA'S QUANTUM PRODUCTION SYSTEM WITH THE 3-PUZZLE PROBLEM
+
+## 1. Aim
+
+- Original Aim: Implement Tarrataca's Quantum Production System with the 3-Puzzle Problem.
+- Simple Explanation: To represent a 3x3 tile puzzle using a quantum circuit and demonstrate quantum operations such as X and SWAP gates to manipulate qubit states.
+
+## 2. Objectives
+
+1. Understand Tarrataca's Quantum Production System.
+2. Understand the 3-Puzzle Problem and its initial and goal states.
+3. Create a quantum circuit to represent puzzle positions.
+4. Apply quantum gates to initialize and manipulate qubits.
+5. Perform quantum measurement and obtain results using a simulator.
+
+## 3. Theory and Important Quantum Concepts
+
+1. Tarrataca's Quantum Production System
+- A quantum approach to solving combinatorial optimization problems using quantum circuits and operations.
+- It represents the problem space and applies quantum operations to search for solutions.
+
+2. 3-Puzzle Problem
+- A puzzle consisting of numbered tiles and one empty position arranged in a 3x3 grid.
+- The objective is to transform the initial arrangement into the required goal arrangement.
+
+Initial State:
+2  5  3
+1  8  6
+4  7  _
+
+Goal State:
+1  2  3
+4  5  6
+7  8  _
+
+3. Qubit
+- A qubit is the basic unit of quantum information.
+- It can exist in a superposition of |0> and |1>.
+
+General representation:
+|ψ> = α|0> + β|1>
+
+4. Quantum Register
+- A collection of qubits used to store quantum information.
+- This practical uses 18 qubits divided into two groups of 9.
+
+5. Quantum Circuit
+- A sequence of quantum gates applied to qubits to perform quantum operations.
+- Here, X and SWAP gates are used.
+
+6. Quantum Measurement
+- Converts quantum information into classical information.
+- Measurement collapses a qubit into |0> or |1>.
+
+7. Quantum Simulation
+- Simulates quantum circuit execution using software.
+- AerSimulator is used instead of an actual quantum computer.
+
+## 4. Code Explanation
+
+Step 1: Install Required Libraries
+
+%pip install qiskit qiskit-aer matplotlib pylatexenc
+
+- Installs Qiskit for quantum circuit creation, Aer for simulation, Matplotlib for visualization and Pylatexenc for mathematical notation.
+- The commented command provides an alternative for Google Colab.
+
+Step 2: Import Required Libraries
+
+from qiskit import QuantumCircuit, transpile
+from qiskit_aer import AerSimulator
+from IPython.display import display
+
+- QuantumCircuit: Creates quantum circuits.
+- transpile: Converts circuits into a backend-compatible format.
+- AerSimulator: Simulates quantum circuits.
+- display: Displays graphical circuit output.
+
+Step 3: Define Initial and Goal States
+
+initial_state = [2, 5, 3, 1, 8, 6, 4, 7, None]
+goal_state = [1, 2, 3, 4, 5, 6, 7, 8, None]
+
+- initial_state represents the starting puzzle arrangement.
+- goal_state represents the required arrangement.
+- None represents the empty position.
+
+Step 4: Define the Quantum Circuit
+
+qc = QuantumCircuit(18, 18)
+
+- Creates a circuit with 18 qubits and 18 classical bits.
+- The first 9 qubits represent puzzle positions, while the remaining 9 are used in SWAP operations.
+
+Step 5: Initialize the Circuit
+
+for i, tile in enumerate(initial_state):
+    if tile is not None:
+        qc.x(i)
+
+- enumerate() provides the index and tile value.
+- If a position contains a tile, an X gate is applied to its corresponding qubit.
+- The occupied positions become |1>, while the empty position remains |0>.
+
+Step 6: Perform SWAP Operations
+
+for i, tile in enumerate(goal_state):
+    if tile is not None:
+        initial_index = initial_state.index(tile)
+        target_index = goal_state.index(tile)
+        qc.swap(i, initial_index + 9)
+        qc.swap(i, target_index + 9)
+
+- Iterates through the goal state and skips the empty position.
+- initial_index finds the original position of a tile.
+- target_index finds its required position.
+- qc.swap() exchanges the states of two qubits.
+- +9 accesses the second group of qubits.
+
+Step 7: Measure the Final State
+
+qc.measure(range(9), range(9))
+
+- Measures the first 9 qubits.
+- Stores their measurement results in the first 9 classical bits.
+
+Step 8: Display the Quantum Circuit
+
+display(qc.draw(output='mpl'))
+print(qc.draw())
+
+- qc.draw(output='mpl') generates a graphical circuit diagram.
+- display() displays the diagram in the notebook.
+- print(qc.draw()) displays the circuit in text format.
+
+Step 9: Simulate the Circuit
+
+backend = AerSimulator()
+transpiled_qc = transpile(qc, backend)
+job = backend.run(transpiled_qc, shots=1024)
+result = job.result()
+
+- Creates the Aer quantum simulator.
+- transpile() prepares the circuit for the simulator.
+- backend.run() executes the circuit for 1024 shots.
+- job.result() retrieves the simulation results.
+
+Step 10: Get Measurement Results
+
+counts = result.get_counts(transpiled_qc)
+
+- Retrieves measurement outcomes as a dictionary.
+- Each key represents a measured bitstring, and its value represents the number of occurrences.
+
+Step 11: Find the Most Probable State
+
+max_count = max(counts.values())
+
+solution = [
+    state for state, count in counts.items()
+    if count == max_count
+][0]
+
+- Finds the highest measurement count.
+- Selects the bitstring having that count.
+- Stores it in the solution variable.
+
+Step 12: Print the Results
+
+print("Measurement Results:")
+print(counts)
+
+print("\nMost Probable State:")
+print(solution)
+
+- Displays all measurement outcomes and their counts.
+- Prints the most frequently measured bitstring.
+
+## 5. Functions and Libraries Used
+
+1. QuantumCircuit(18,18): Creates a circuit with 18 qubits and classical bits.
+2. qc.x(i): Applies an X gate to a qubit.
+3. qc.swap(i,j): Exchanges states of two qubits.
+4. qc.measure(): Measures qubits and stores results in classical bits.
+5. qc.draw(): Displays the circuit in text format.
+6. transpile(): Converts the circuit into a backend-compatible format.
+7. AerSimulator(): Creates a quantum simulator.
+8. backend.run(): Executes the quantum circuit.
+9. job.result(): Retrieves simulation results.
+10. get_counts(): Returns measurement outcomes and their counts.
+11. display(): Displays graphical output in the notebook.
+
+## 6. Quantum Gates and Operations Used
+
+1. Pauli-X Gate
+- Works like a classical NOT gate and flips the qubit state.
+
+Matrix:
+X = [[0, 1],
+     [1, 0]]
+
+X|0> = |1>
+
+2. SWAP Gate
+- Exchanges the states of two qubits.
+
+Matrix:
+SWAP = [[1, 0, 0, 0],
+        [0, 0, 1, 0],
+        [0, 1, 0, 0],
+        [0, 0, 0, 1]]
+
+Example:
+SWAP|01> = |10>
+
+3. Measurement
+- Converts quantum states into classical measurement results.
+- The results are stored in corresponding classical bits.
+
+## 7. Program Logic and Execution Flow
+
+1. Install and import required libraries.
+2. Define initial and goal puzzle configurations.
+3. Create a quantum circuit with 18 qubits and 18 classical bits.
+4. Apply X gates to initialize occupied positions.
+5. Find the initial and target indices of each tile.
+6. Apply SWAP operations between the two groups of qubits.
+7. Measure the first 9 qubits.
+8. Display the quantum circuit.
+9. Create the Aer simulator and transpile the circuit.
+10. Execute the circuit for 1024 shots.
+11. Retrieve measurement counts.
+12. Find and display the most probable bitstring.
+
+## 8. Output Explanation
+
+1. Circuit Diagram
+- Displays 18 qubit lines with X gates, SWAP gates and measurement operations.
+- X gates represent initialization, while SWAP gates represent state exchanges.
+
+2. Measurement Results
+- Displays a dictionary containing bitstrings and their occurrence counts.
+- Each bitstring represents the measured classical output.
+
+3. Most Probable State
+- Displays the bitstring having the highest measurement count.
+
+4. Significance of Shots
+- One shot represents one execution of the circuit.
+- The program uses 1024 shots to collect measurement results.
+
+Important Observation:
+- The circuit uses only X and SWAP gates, so it does not create superposition or entanglement.
+- On an ideal simulator, the same measurement result is expected in all 1024 shots.
+
+## 9. Achievement of Objectives
+
+1. Understanding Quantum Production Systems: Demonstrated the representation of a puzzle using a quantum circuit.
+2. Understanding the 3-Puzzle: Defined initial and goal configurations using Python lists.
+3. Creating Quantum Circuits: Created a circuit containing 18 qubits and 18 classical bits.
+4. Applying Quantum Operations: Used X and SWAP gates to manipulate qubit states.
+5. Performing Measurement: Measured qubits and obtained classical results.
+6. Quantum Simulation: Executed the circuit using AerSimulator.
+
+Implementation Note:
+The provided code demonstrates circuit construction, initialization, SWAP operations and measurement. However, it does not implement a complete Tarrataca production-system search or verify that the puzzle reaches the goal state. It also does not implement QAOA or Grover's algorithm mentioned in the lab manual.
+
+## 10. Important Viva Questions and Answers
+
+Q1. What is Tarrataca's Quantum Production System?
+- A quantum approach to solving combinatorial optimization problems using quantum circuits and operations.
+
+Q2. What is the 3-Puzzle Problem?
+- A tile-arrangement problem in which numbered tiles must be arranged into a specified goal configuration.
+
+Q3. What is a qubit?
+- The basic unit of quantum information that can exist in a superposition of |0> and |1>.
+
+Q4. What is the function of an X gate?
+- It flips the qubit state from |0> to |1> or |1> to |0>.
+
+Q5. What is a SWAP gate?
+- It exchanges the quantum states of two qubits.
+
+Q6. Why are 18 qubits used?
+- The circuit uses two groups of 9 qubits, with the second group participating in SWAP operations.
+
+Q7. What is AerSimulator?
+- A software-based simulator used to execute quantum circuits.
+
+Q8. What is transpilation?
+- The process of converting a quantum circuit into a backend-compatible format.
+
+Q9. What is the purpose of shots?
+- Shots specify how many times a circuit is executed. Here, 1024 shots are used.
+
+Q10. Does this practical use superposition or entanglement?
+- No. The provided code uses X and SWAP gates without Hadamard or entangling gates.
+
+Q11. What does get_counts() return?
+- It returns a dictionary containing measurement bitstrings and their occurrence counts.
+
+Q12. Does the code completely solve the 3-Puzzle?
+- No. It demonstrates quantum state manipulation but does not implement a complete puzzle-solving search algorithm or verify the goal configuration.

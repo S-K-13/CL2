@@ -1,0 +1,338 @@
+
+# Practical 1: 16 Qubit Random Number Generator
+
+
+# Step 1: Install required libraries
+
+# Jupyter Notebook (DEFAULT)
+%pip install qiskit qiskit-aer matplotlib pylatexenc
+
+# Google Colab (ALTERNATIVE)
+# !pip install qiskit qiskit-aer matplotlib pylatexenc
+
+
+# Step 2: Import required libraries
+from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit
+from qiskit_aer import AerSimulator
+from IPython.display import display
+
+
+# Step 3: Initialize quantum and classical registers
+
+# Create a quantum register containing 16 qubits
+q = QuantumRegister(16, 'q')
+
+# Create a classical register containing 16 bits
+c = ClassicalRegister(16, 'c')
+
+
+# Step 4: Create the quantum circuit
+circuit = QuantumCircuit(q, c)
+
+
+# Step 5: Apply Hadamard gate to all 16 qubits
+# This puts all qubits into superposition
+circuit.h(q)
+
+
+# Step 6: Measure all qubits
+# Store measurement results in classical bits
+circuit.measure(q, c)
+
+
+# Step 7: Display the quantum circuit
+
+# Display circuit in graphical format
+display(circuit.draw(output='mpl'))
+
+# Display circuit in text format
+print(circuit.draw())
+
+
+# Step 8: Initialize the quantum simulator
+backend = AerSimulator()
+
+
+# Step 9: Execute the circuit with one shot
+print("Executing Job...\n")
+
+job = backend.run(circuit, shots=1)
+
+# Get the execution result
+result = job.result()
+
+# Extract measurement counts
+counts = result.get_counts(circuit)
+
+
+# Step 10: Display the generated random number
+print("RESULT:", counts)
+
+# Display the 16-bit random number
+random_number = list(counts.keys())[0]
+
+print("\n16 Qubit Random Number:", random_number)
+
+print("\nProgram Executed Successfully!")
+
+
+
+/////////////////////////////////////////////////////
+
+# PRACTICAL NO. 1: 16 QUBIT RANDOM NUMBER GENERATOR
+
+## 1. Aim
+
+- To implement a 16 Qubit Random Number Generator using Qiskit.
+- The program generates a random 16-bit binary number by applying Hadamard gates to 16 qubits and measuring their states.
+
+## 2. Objectives
+
+1. Understand creation of Qubit Circuit: Learn to initialize quantum and classical registers and create a quantum circuit.
+2. Create 16 Qubit Random Number Generator: Apply Hadamard gates to all 16 qubits and measure them to generate a random 16-bit number.
+
+## 3. Theory and Important Quantum Concepts
+
+1. Qubit:
+   - A qubit is the basic unit of quantum information.
+   - It can exist in state |0>, |1>, or a superposition of both.
+
+2. Superposition:
+   - A qubit can exist in a combination of |0> and |1> until measurement.
+   - In this practical, each qubit has an equal probability of producing 0 or 1.
+
+3. Hadamard Gate (H):
+   - Creates an equal superposition of |0> and |1>.
+   - Converts |0> into |+> and |1> into |->.
+
+   Formula:
+
+   |+> = (|0> + |1>) / √2
+
+   Matrix:
+
+   H = 1/√2 × [[1, 1], [1, -1]]
+
+4. Quantum Register:
+   - A collection of qubits used to store quantum information.
+   - This practical uses 16 qubits.
+
+5. Classical Register:
+   - Stores measurement results obtained from quantum qubits.
+   - This practical uses 16 classical bits.
+
+6. Quantum Circuit:
+   - A sequence of quantum gates and operations applied to qubits.
+   - Here, it contains Hadamard gates and measurement operations.
+
+7. Quantum Measurement:
+   - Converts a quantum state into a classical result (0 or 1).
+   - Measurement collapses the superposition into one of the possible states.
+
+8. Quantum Random Number Generation:
+   - Each qubit has a 50% probability of producing 0 or 1.
+   - Measuring 16 qubits generates a random 16-bit binary number.
+
+   Total possible combinations = 2^16 = 65,536.
+
+## 4. Code Explanation
+
+### Step 1: Install Required Libraries
+
+- `qiskit`: Used to create and manipulate quantum circuits.
+- `qiskit-aer`: Provides quantum simulators.
+- `matplotlib`: Used for graphical visualization.
+- `pylatexenc`: Helps render mathematical expressions and circuit diagrams.
+
+Note: `%pip` is used in Jupyter Notebook, while `!pip` is the alternative for Google Colab.
+
+### Step 2: Import Required Libraries
+
+- `QuantumRegister`: Creates quantum registers.
+- `ClassicalRegister`: Creates classical registers.
+- `QuantumCircuit`: Creates quantum circuits.
+- `AerSimulator`: Simulates quantum circuits locally.
+- `display`: Displays the circuit in Jupyter Notebook.
+
+### Step 3: Initialize Quantum and Classical Registers
+
+- `q = QuantumRegister(16, 'q')` creates a quantum register containing 16 qubits.
+- `c = ClassicalRegister(16, 'c')` creates a classical register containing 16 bits.
+- Classical bits store the measurement results of corresponding qubits.
+
+### Step 4: Create the Quantum Circuit
+
+- `circuit = QuantumCircuit(q, c)` creates a circuit using the 16 quantum and 16 classical bits.
+- This circuit is used to apply gates and perform measurements.
+
+### Step 5: Apply Hadamard Gate
+
+- `circuit.h(q)` applies the Hadamard gate to all 16 qubits.
+- Each qubit enters an equal superposition of |0> and |1>.
+- Both outcomes have a 50% measurement probability.
+
+### Step 6: Measure All Qubits
+
+- `circuit.measure(q, c)` measures all 16 qubits.
+- The measurement results are stored in the corresponding classical bits.
+- Each qubit collapses into either 0 or 1.
+
+### Step 7: Display the Quantum Circuit
+
+- `circuit.draw(output='mpl')` generates the graphical circuit diagram.
+- `display()` displays the diagram in Jupyter Notebook.
+- `print(circuit.draw())` displays the circuit in text format.
+
+### Step 8: Initialize Quantum Simulator
+
+- `backend = AerSimulator()` initializes a local quantum simulator.
+- It allows the circuit to run without requiring a physical quantum computer.
+
+### Step 9: Execute the Circuit
+
+- `backend.run(circuit, shots=1)` executes the circuit once.
+- `job.result()` retrieves the execution result.
+- `result.get_counts(circuit)` extracts the measurement outcomes and their frequencies.
+- Since one shot is used, only one random number is generated.
+
+### Step 10: Display the Random Number
+
+- `print("RESULT:", counts)` displays the measurement result.
+- `counts.keys()` retrieves the generated binary number.
+- `list(counts.keys())[0]` extracts the 16-bit random number.
+- The final print statement displays successful execution.
+
+## 5. Functions and Libraries Used
+
+| Function | Purpose |
+|---|---|
+| `QuantumRegister()` | Creates a quantum register. |
+| `ClassicalRegister()` | Creates a classical register. |
+| `QuantumCircuit()` | Creates a quantum circuit. |
+| `circuit.h()` | Applies Hadamard gates. |
+| `circuit.measure()` | Measures qubits and stores results. |
+| `circuit.draw()` | Displays the circuit diagram. |
+| `display()` | Displays graphical output. |
+| `AerSimulator()` | Initializes a local simulator. |
+| `backend.run()` | Executes the quantum circuit. |
+| `job.result()` | Retrieves execution results. |
+| `get_counts()` | Returns measurement outcomes and frequencies. |
+
+Important Parameters:
+
+- `QuantumRegister(16, 'q')`: 16 represents the number of qubits and 'q' is the register name.
+- `ClassicalRegister(16, 'c')`: 16 represents the number of classical bits and 'c' is the register name.
+- `shots=1`: Executes the circuit once.
+- `output='mpl'`: Uses Matplotlib for circuit visualization.
+
+## 6. Quantum Gates and Operations Used
+
+### 1. Hadamard Gate (H)
+
+- Purpose: Creates superposition in a qubit.
+- Operation: Converts |0> into |+> and |1> into |->.
+
+Matrix:
+
+H = 1/√2 × [[1, 1], [1, -1]]
+
+In this practical, it is applied to all 16 qubits using `circuit.h(q)`.
+
+### 2. Measurement
+
+- Purpose: Converts quantum information into classical information.
+- Operation: Collapses a qubit into either |0> or |1>.
+- Used through `circuit.measure(q, c)`.
+
+## 7. Program Logic and Execution Flow
+
+1. Start the program.
+2. Install the required libraries.
+3. Import Qiskit modules and simulator.
+4. Initialize 16 quantum qubits.
+5. Initialize 16 classical bits.
+6. Create the quantum circuit.
+7. Apply Hadamard gates to all qubits.
+8. Measure all qubits.
+9. Display the quantum circuit.
+10. Initialize the Aer simulator.
+11. Execute the circuit using one shot.
+12. Retrieve measurement results.
+13. Extract and display the 16-bit random number.
+14. Stop the program.
+
+## 8. Output Explanation
+
+1. Circuit Diagram:
+   - Displays 16 horizontal qubit lines.
+   - Each line contains a Hadamard gate (H) followed by a measurement operation.
+   - Measurement results are stored in the corresponding classical bits.
+
+2. Measurement Result:
+   - The `counts` variable displays the generated binary number and its frequency.
+   - Since one shot is used, the frequency of the result is 1.
+
+Example output (illustrative):
+
+    RESULT: {'1011010010110101': 1}
+
+    16 Qubit Random Number: 1011010010110101
+
+    Program Executed Successfully!
+
+3. Observations:
+   - Each qubit has an equal probability of producing 0 or 1.
+   - A total of 65,536 different 16-bit combinations are possible.
+   - One shot generates one random number.
+   - The generated number may change on repeated executions.
+
+## 9. Achievement of Objectives
+
+1. Understand creation of Qubit Circuit:
+   - Achieved by initializing quantum and classical registers and creating a circuit using `QuantumCircuit()`.
+
+2. Create 16 Qubit Random Number Generator:
+   - Achieved by applying Hadamard gates to all 16 qubits and measuring them to generate a random 16-bit number.
+
+## 10. Important Viva Questions and Answers
+
+Q1. What is a qubit?
+
+A qubit is the basic unit of quantum information that can exist in |0>, |1>, or a superposition of both.
+
+Q2. What is a Hadamard gate?
+
+It is a quantum gate used to create superposition in a qubit.
+
+Q3. What is superposition?
+
+It is a quantum property in which a qubit exists as a combination of multiple possible states until measurement.
+
+Q4. What are the two types of registers used?
+
+- Quantum Register: Stores qubits.
+- Classical Register: Stores measurement results.
+
+Q5. What is a quantum circuit?
+
+It is a sequence of quantum gates and operations applied to qubits.
+
+Q6. How many possible numbers can be generated using 16 qubits?
+
+There are 65,536 possible combinations because 2^16 = 65,536.
+
+Q7. Why is the Hadamard gate applied?
+
+It creates an equal superposition, giving 0 and 1 a 50% probability each.
+
+Q8. What is quantum measurement?
+
+It is the process of observing a qubit and obtaining a classical result of either 0 or 1.
+
+Q9. What is AerSimulator?
+
+It is a local quantum simulator provided by Qiskit Aer for executing quantum circuits.
+
+Q10. What are shots?
+
+Shots represent the number of times a quantum circuit is executed. Here, one shot generates one 16-bit random number.

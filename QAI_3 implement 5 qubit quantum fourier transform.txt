@@ -1,0 +1,354 @@
+# Practical 3: Implementing a 5-Qubit Quantum Fourier Transform
+
+# Step 1: Install required libraries
+%pip install qiskit qiskit-aer matplotlib pylatexenc
+
+# Google Colab alternative:
+# !pip install qiskit qiskit-aer matplotlib pylatexenc
+
+
+# Step 2: Import required libraries
+from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit, transpile
+from qiskit.circuit.library import QFTGate
+from qiskit_aer import AerSimulator
+from IPython.display import display
+
+
+# Step 3: Create 5 quantum bits and 5 classical bits
+q = QuantumRegister(5, 'q')
+c = ClassicalRegister(5, 'c')
+
+circuit = QuantumCircuit(q, c)
+
+
+# Step 4: Prepare the input quantum state
+circuit.x(q[4])
+circuit.x(q[2])
+circuit.x(q[0])
+
+
+# Step 5: Apply the 5-qubit Quantum Fourier Transform
+qft = QFTGate(5)
+
+circuit.compose(qft, qubits=q, inplace=True)
+
+
+# Step 6: Measure all qubits
+circuit.measure(q, c)
+
+
+# Step 7: Display the quantum circuit
+display(circuit.draw(output='mpl'))
+
+# Display circuit in text format
+print(circuit.draw())
+
+
+# Step 8: Simulate the quantum circuit
+backend = AerSimulator()
+
+transpiled_circuit = transpile(circuit, backend)
+
+job = backend.run(transpiled_circuit, shots=1000)
+
+result = job.result()
+
+
+# Step 9: Get and display measurement results
+counts = result.get_counts(transpiled_circuit)
+
+print("\nQFT Output:")
+
+for key, value in counts.items():
+    print(key, ":", value)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////
+
+
+# PRACTICAL NO. 3: IMPLEMENTING A 5-QUBIT QUANTUM FOURIER TRANSFORM
+
+## 1. Aim
+
+- To implement a 5-qubit Quantum Fourier Transform (QFT) using Qiskit.
+- QFT transforms a quantum state from the computational basis into the Fourier basis using quantum gates.
+
+## 2. Objectives
+
+1. Understand Quantum Fourier Transform: Learn how QFT transforms quantum states into the Fourier basis.
+2. Create 5-Qubit Quantum Fourier Transform: Construct and execute a 5-qubit QFT circuit using Qiskit.
+
+## 3. Theory and Important Quantum Concepts
+
+1. Quantum Fourier Transform (QFT):
+   - QFT is a quantum algorithm that transforms a quantum state from the computational basis into the Fourier basis.
+   - It uses Hadamard gates and controlled phase rotation gates.
+
+2. Computational Basis:
+   - The standard quantum states represented by |0> and |1>.
+   - A multi-qubit system can represent binary states such as |00000> and |10101>.
+
+3. Fourier Basis:
+   - It represents quantum states using different phase relationships.
+   - QFT transforms the input state into this basis.
+
+4. Superposition:
+   - A qubit can exist in a combination of |0> and |1>.
+   - Hadamard gates help create superposition during QFT.
+
+5. Phase Rotation:
+   - Phase rotation gates change the phase of a quantum state.
+   - Controlled phase rotations are used to perform the Fourier transformation.
+
+6. Swap Operation:
+   - Swap gates exchange the states of two qubits.
+   - They are used in QFT to arrange the output qubits in the correct order.
+
+7. Inverse QFT:
+   - It reverses the operations performed by QFT.
+   - It is used to recover the original quantum information.
+
+Important Formula:
+
+QFT |x> = (1/√N) Σ e^(2πixy/N) |y>
+
+Where:
+- N = 2^n, the total number of possible states.
+- x = Input state.
+- y = Output state.
+- n = Number of qubits.
+
+For 5 qubits:
+
+N = 2^5 = 32
+
+Therefore, 32 computational basis states are possible.
+
+## 4. Code Explanation
+
+### Step 1: Install Required Libraries
+
+- `qiskit`: Used to create quantum circuits.
+- `qiskit-aer`: Provides quantum simulators.
+- `matplotlib`: Used for circuit visualization.
+- `pylatexenc`: Helps render quantum circuit diagrams.
+
+Note: `%pip` is used in Jupyter Notebook, while `!pip` is the alternative for Google Colab.
+
+### Step 2: Import Required Libraries
+
+- `QuantumRegister`: Creates quantum registers.
+- `ClassicalRegister`: Creates classical registers.
+- `QuantumCircuit`: Creates quantum circuits.
+- `transpile`: Converts the circuit into instructions suitable for the simulator.
+- `QFTGate`: Provides the Quantum Fourier Transform gate.
+- `AerSimulator`: Simulates quantum circuits locally.
+- `display`: Displays graphical circuit output.
+
+### Step 3: Create Quantum and Classical Registers
+
+- `QuantumRegister(5, 'q')` creates a register containing 5 qubits.
+- `ClassicalRegister(5, 'c')` creates a register containing 5 classical bits.
+- `QuantumCircuit(q, c)` combines both registers to create the circuit.
+
+### Step 4: Prepare the Input Quantum State
+
+- `circuit.x(q[4])` applies an X gate to qubit 4.
+- `circuit.x(q[2])` applies an X gate to qubit 2.
+- `circuit.x(q[0])` applies an X gate to qubit 0.
+- These operations initialize the input state as |10101> when written in q4-to-q0 order.
+
+### Step 5: Apply the 5-Qubit Quantum Fourier Transform
+
+- `qft = QFTGate(5)` creates a QFT gate for 5 qubits.
+- `circuit.compose(qft, qubits=q, inplace=True)` adds the QFT operation to the existing circuit.
+- The QFT transforms the input quantum state into the Fourier basis.
+
+### Step 6: Measure All Qubits
+
+- `circuit.measure(q, c)` measures all 5 qubits.
+- Measurement results are stored in the corresponding classical bits.
+- The measurement produces a 5-bit binary outcome.
+
+### Step 7: Display the Quantum Circuit
+
+- `circuit.draw(output='mpl')` generates the graphical circuit diagram.
+- `display()` displays the circuit in Jupyter Notebook.
+- `print(circuit.draw())` displays the circuit in text format.
+
+### Step 8: Simulate the Quantum Circuit
+
+- `backend = AerSimulator()` initializes the local quantum simulator.
+- `transpile(circuit, backend)` converts the circuit into instructions supported by the simulator.
+- `backend.run(transpiled_circuit, shots=1000)` executes the circuit 1000 times.
+- `job.result()` retrieves the simulation results.
+
+### Step 9: Get and Display Measurement Results
+
+- `result.get_counts(transpiled_circuit)` extracts measurement outcomes and their frequencies.
+- `counts.items()` retrieves each binary outcome and its corresponding count.
+- The loop displays the measurement results.
+
+## 5. Functions and Libraries Used
+
+| Function | Purpose |
+|---|---|
+| `QuantumRegister()` | Creates a quantum register. |
+| `ClassicalRegister()` | Creates a classical register. |
+| `QuantumCircuit()` | Creates a quantum circuit. |
+| `circuit.x()` | Applies Pauli-X gate. |
+| `QFTGate(5)` | Creates a 5-qubit QFT gate. |
+| `circuit.compose()` | Adds the QFT gate to the circuit. |
+| `circuit.measure()` | Measures all qubits. |
+| `circuit.draw()` | Displays the circuit diagram. |
+| `AerSimulator()` | Initializes a local simulator. |
+| `transpile()` | Converts the circuit into simulator-compatible instructions. |
+| `backend.run()` | Executes the quantum circuit. |
+| `job.result()` | Retrieves execution results. |
+| `get_counts()` | Returns measurement outcomes and frequencies. |
+
+Important Parameters:
+
+- `QFTGate(5)`: Creates a QFT operation for 5 qubits.
+- `qubits=q`: Specifies the qubits on which QFT is applied.
+- `inplace=True`: Modifies the existing circuit directly.
+- `shots=1000`: Executes the circuit 1000 times.
+
+## 6. Quantum Gates and Operations Used
+
+### 1. Pauli-X Gate (X)
+
+- Acts like a quantum NOT gate.
+- Converts |0> into |1> and |1> into |0>.
+
+Matrix:
+
+X = [[0, 1], [1, 0]]
+
+Used to prepare the input state |10101>.
+
+### 2. Quantum Fourier Transform (QFT)
+
+- Converts a quantum state from the computational basis into the Fourier basis.
+- Uses Hadamard gates and controlled phase rotations internally.
+- In this practical, it is applied using `QFTGate(5)`.
+
+### 3. Controlled Phase Rotation
+
+- Changes the phase of a target qubit depending on the control qubit.
+- It is an important operation used internally in QFT.
+
+### 4. Swap Gate
+
+- Exchanges the states of two qubits.
+- Used in the standard QFT circuit to arrange qubit order when required.
+
+## 7. Program Logic and Execution Flow
+
+1. Start the program.
+2. Install the required libraries.
+3. Import Qiskit modules and simulator.
+4. Create 5 quantum qubits and 5 classical bits.
+5. Initialize the input state using X gates.
+6. Create a 5-qubit QFT gate.
+7. Apply QFT to all 5 qubits.
+8. Measure all qubits.
+9. Display the quantum circuit.
+10. Initialize the Aer simulator.
+11. Transpile the circuit.
+12. Execute the circuit using 1000 shots.
+13. Retrieve measurement counts.
+14. Display the QFT output.
+15. Stop the program.
+
+## 8. Output Explanation
+
+1. Circuit Diagram:
+   - Displays 5 quantum wires and 5 classical wires.
+   - X gates prepare the input state.
+   - The QFT block represents the Fourier transformation.
+   - Measurement operations store results in classical bits.
+
+2. Measurement Results:
+   - The `counts` variable displays binary outcomes and their frequencies.
+   - Since QFT transforms a computational basis state into a superposition with equal measurement probabilities, all 32 outcomes ideally have equal probabilities.
+
+Example output format:
+
+    QFT Output:
+    00000 : 30
+    00001 : 34
+    00010 : 28
+    ...
+
+   Note: Actual counts vary because quantum measurement is probabilistic.
+
+3. Important Observations:
+   - The input state is transformed into the Fourier basis.
+   - QFT creates a superposition of 32 possible computational basis states.
+   - With 1000 shots, the expected count for each outcome is approximately 31.25.
+   - The output demonstrates the working of a 5-qubit QFT.
+
+## 9. Achievement of Objectives
+
+1. Understand Quantum Fourier Transform:
+   - Achieved by applying the QFT gate to transform the input quantum state into the Fourier basis.
+
+2. Create 5-Qubit Quantum Fourier Transform:
+   - Achieved by creating a 5-qubit circuit, applying `QFTGate(5)` and executing it using the Aer simulator.
+
+## 10. Important Viva Questions and Answers
+
+Q1. What is Quantum Fourier Transform?
+
+QFT is a quantum algorithm that transforms quantum states from the computational basis into the Fourier basis.
+
+Q2. What is the purpose of QFT?
+
+It is used in quantum algorithms for phase estimation, factoring and other quantum computations.
+
+Q3. How many possible states are available in a 5-qubit system?
+
+There are 32 possible computational basis states because 2^5 = 32.
+
+Q4. Which gates are used in QFT?
+
+Hadamard gates, controlled phase rotation gates and swap gates are used.
+
+Q5. What is a Hadamard gate?
+
+It is a quantum gate that creates superposition from computational basis states.
+
+Q6. What is a phase rotation gate?
+
+It changes the phase of a quantum state without changing its measurement probabilities directly.
+
+Q7. What is an inverse QFT?
+
+It reverses the operations of QFT and helps recover the original quantum information.
+
+Q8. What is the purpose of QFTGate(5)?
+
+It creates a Quantum Fourier Transform operation for 5 qubits.
+
+Q9. What is transpilation in Qiskit?
+
+Transpilation converts a quantum circuit into instructions supported by the selected backend.
+
+Q10. Why are 1000 shots used?
+
+They execute the circuit 1000 times to collect measurement statistics and observe the probability distribution.
