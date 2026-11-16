@@ -1,0 +1,587 @@
+
+# Practical 5: Agglomerative Hierarchical Clustering
+
+# Step 1: Install required libraries
+
+#%pip install pandas numpy matplotlib scikit-learn scipy
+
+# Google Colab alternative:
+!pip install pandas numpy matplotlib scikit-learn scipy
+
+
+# Step 2: Import required libraries
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+from sklearn.decomposition import PCA
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.preprocessing import StandardScaler, normalize
+from sklearn.metrics import silhouette_score
+
+import scipy.cluster.hierarchy as shc
+
+
+# Step 3: Load dataset directly using URL
+
+url = "https://archive.ics.uci.edu/ml/machine-learning-databases/00292/Wholesale%20customers%20data.csv"
+
+df = pd.read_csv(url)
+
+
+# Step 4: Display and understand the dataset
+
+print("First five records:")
+print(df.head())
+
+print("\nDataset Shape:", df.shape)
+
+print("\nDataset Information:")
+print(df.info())
+
+print("\nColumn Names:")
+print(df.columns)
+
+print("\nMissing Values:")
+print(df.isnull().sum())
+
+
+# Step 5: Select required features
+
+# Remove categorical columns Channel and Region
+X = df.drop(["Channel", "Region"], axis=1)
+
+# Handle missing values
+X = X.ffill()
+
+
+# Step 6: Preprocess the data
+
+# Scale all features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Normalize the scaled data
+X_normalized = normalize(X_scaled)
+
+X_normalized = pd.DataFrame(X_normalized)
+
+
+# Step 7: Reduce dimensions using PCA
+
+pca = PCA(n_components=2)
+X_principal = pca.fit_transform(X_normalized)
+
+X_principal = pd.DataFrame(X_principal)
+X_principal.columns = ["P1", "P2"]
+
+print("\nPCA Result:")
+print(X_principal.head())
+
+
+# Step 8: Visualize the Dendrogram
+
+plt.figure(figsize=(8, 8))
+plt.title("Visualizing the Dendrogram")
+
+dendrogram = shc.dendrogram(
+    shc.linkage(X_principal, method="ward")
+)
+
+plt.show()
+
+
+# Step 9: Perform Agglomerative Clustering
+
+# K = 2
+ac2 = AgglomerativeClustering(n_clusters=2)
+labels2 = ac2.fit_predict(X_principal)
+
+plt.figure(figsize=(6, 6))
+plt.scatter(X_principal["P1"], X_principal["P2"], c=labels2, cmap="rainbow")
+plt.title("Agglomerative Clustering (K=2)")
+plt.show()
+
+
+# K = 3
+ac3 = AgglomerativeClustering(n_clusters=3)
+labels3 = ac3.fit_predict(X_principal)
+
+plt.figure(figsize=(6, 6))
+plt.scatter(X_principal["P1"], X_principal["P2"], c=labels3, cmap="rainbow")
+plt.title("Agglomerative Clustering (K=3)")
+plt.show()
+
+
+# K = 4
+ac4 = AgglomerativeClustering(n_clusters=4)
+labels4 = ac4.fit_predict(X_principal)
+
+plt.figure(figsize=(6, 6))
+plt.scatter(X_principal["P1"], X_principal["P2"], c=labels4, cmap="rainbow")
+plt.title("Agglomerative Clustering (K=4)")
+plt.show()
+
+
+# K = 5
+ac5 = AgglomerativeClustering(n_clusters=5)
+labels5 = ac5.fit_predict(X_principal)
+
+plt.figure(figsize=(6, 6))
+plt.scatter(X_principal["P1"], X_principal["P2"], c=labels5, cmap="rainbow")
+plt.title("Agglomerative Clustering (K=5)")
+plt.show()
+
+
+# K = 6
+ac6 = AgglomerativeClustering(n_clusters=6)
+labels6 = ac6.fit_predict(X_principal)
+
+plt.figure(figsize=(6, 6))
+plt.scatter(X_principal["P1"], X_principal["P2"], c=labels6, cmap="rainbow")
+plt.title("Agglomerative Clustering (K=6)")
+plt.show()
+
+
+# Step 10: Calculate Silhouette Scores
+
+k = [2, 3, 4, 5, 6]
+
+silhouette_scores = []
+
+silhouette_scores.append(silhouette_score(X_principal, labels2))
+silhouette_scores.append(silhouette_score(X_principal, labels3))
+silhouette_scores.append(silhouette_score(X_principal, labels4))
+silhouette_scores.append(silhouette_score(X_principal, labels5))
+silhouette_scores.append(silhouette_score(X_principal, labels6))
+
+
+# Display Silhouette Scores
+
+print("\nSilhouette Scores:")
+
+for i in range(len(k)):
+    print("K =", k[i], "Score =", silhouette_scores[i])
+
+
+# Step 11: Plot Silhouette Scores
+
+plt.bar(k, silhouette_scores)
+
+plt.xlabel("Number of Clusters")
+plt.ylabel("Silhouette Score")
+plt.title("Comparison of Silhouette Scores")
+
+plt.show()
+
+
+# Find optimal number of clusters
+
+optimal_k = k[np.argmax(silhouette_scores)]
+
+print("\nOptimal Number of Clusters:", optimal_k)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////
+
+
+# PRACTICAL NO. 5: AGGLOMERATIVE HIERARCHICAL CLUSTERING
+
+## 1. Aim
+
+- To implement Agglomerative Hierarchical Clustering using Python.
+- The practical groups similar wholesale customers based on their purchasing patterns using a bottom-up clustering approach.
+- It also uses a dendrogram and Silhouette Score to analyse and identify the optimal number of clusters.
+
+## 2. Objectives
+
+- To understand the concept of hierarchical clustering.
+- To implement Agglomerative Clustering on a dataset.
+- To understand data preprocessing, feature scaling and normalization.
+- To visualize clusters using PCA and a dendrogram.
+- To evaluate clustering performance using Silhouette Score.
+- To identify the optimal number of clusters.
+
+## 3. Theory and Important Concepts
+
+- Clustering: It is an unsupervised machine learning technique that groups similar data points into clusters.
+- Hierarchical Clustering: It creates a hierarchy of clusters based on similarities between data points.
+- Agglomerative Clustering: It is a bottom-up approach where every data point initially forms an individual cluster, and similar clusters are repeatedly merged.
+- Bottom-Up Approach: Initially, each data point is treated as a separate cluster. Clusters are gradually combined until the required number of clusters is obtained.
+- Dendrogram: It is a tree-like diagram that represents how clusters are merged at different distances.
+- Ward Linkage: A linkage method that merges clusters by minimizing the increase in within-cluster variance.
+- Euclidean Distance: Measures the straight-line distance between two data points.
+- Feature Scaling: Converts numerical features into a comparable scale.
+- Standardization: Transforms features to have approximately zero mean and unit standard deviation.
+- Normalization: Scales each data sample to a unit norm so that its overall magnitude becomes 1.
+- PCA (Principal Component Analysis): A dimensionality reduction technique that transforms data into fewer components while preserving as much variance as possible.
+- Principal Components: New features created by PCA that represent the major patterns of variation in the original data.
+- Silhouette Score: Measures how well a data point fits within its own cluster compared to other clusters.
+- Optimal Number of Clusters: The number of clusters that provides the best clustering quality according to the selected evaluation metric.
+
+### Working of Agglomerative Clustering
+
+1. Initially, every data point is considered an individual cluster.
+2. Calculate the distances between clusters.
+3. Identify the two closest clusters.
+4. Merge the closest clusters.
+5. Repeat the process until the required number of clusters is obtained.
+
+### Important Dataset Features
+
+The Wholesale Customers Dataset contains purchasing information such as:
+
+- Fresh: Spending on fresh products.
+- Milk: Spending on milk products.
+- Grocery: Spending on grocery products.
+- Frozen: Spending on frozen products.
+- Detergents_Paper: Spending on detergents and paper products.
+- Delicassen: Spending on delicatessen products.
+
+Channel and Region are categorical columns and are removed before clustering.
+
+## 4. Code Explanation
+
+### Step 1: Install Required Libraries
+
+- Pandas is used for dataset handling.
+- NumPy is used for numerical operations.
+- Matplotlib is used for visualization.
+- Scikit-learn provides PCA, clustering, preprocessing and evaluation functions.
+- SciPy is used to generate the hierarchical clustering dendrogram.
+
+### Step 2: Import Required Libraries
+
+- `pandas`: Handles the dataset using DataFrames.
+- `numpy`: Performs numerical calculations.
+- `matplotlib.pyplot`: Creates graphs and visualizations.
+- `PCA`: Performs dimensionality reduction.
+- `AgglomerativeClustering`: Implements hierarchical clustering.
+- `StandardScaler`: Standardizes numerical features.
+- `normalize`: Scales data samples to unit norm.
+- `silhouette_score`: Evaluates clustering quality.
+- `scipy.cluster.hierarchy`: Provides hierarchical clustering and dendrogram functions.
+
+### Step 3: Load Dataset Directly Using URL
+
+- The URL contains the Wholesale Customers Dataset from the UCI Machine Learning Repository.
+- `pd.read_csv(url)` downloads and loads the CSV dataset directly into a DataFrame named `df`.
+- The dataset contains customer purchasing information.
+
+### Step 4: Display and Understand the Dataset
+
+- `df.head()` displays the first five records.
+- `df.shape` displays the number of rows and columns.
+- `df.info()` displays column names, data types and non-null counts.
+- `df.columns` displays all column names.
+- `df.isnull().sum()` displays the number of missing values in each column.
+- These operations help understand the dataset before clustering.
+
+### Step 5: Select Required Features
+
+- `df.drop(["Channel", "Region"], axis=1)` removes the categorical columns Channel and Region.
+- `axis=1` indicates that columns are being removed.
+- The remaining numerical features are stored in `X`.
+- `X.ffill()` fills missing values using the previous available value in the same column.
+- This prepares the numerical data for further processing.
+
+### Step 6: Preprocess the Data
+
+Standardization:
+
+- `StandardScaler()` creates a standardization object.
+- `scaler.fit_transform(X)` calculates the mean and standard deviation of each feature and transforms the data.
+- The standardized data is stored in `X_scaled`.
+- Standardization prevents features with large numerical values from dominating the clustering process.
+
+Normalization:
+
+- `normalize(X_scaled)` scales each row to unit norm.
+- The normalized data is stored in `X_normalized`.
+- `pd.DataFrame(X_normalized)` converts the normalized array into a DataFrame.
+
+### Step 7: Reduce Dimensions Using PCA
+
+- `PCA(n_components=2)` creates a PCA model with two principal components.
+- `pca.fit_transform(X_normalized)` learns the principal components and transforms the data into two dimensions.
+- The reduced data is stored in `X_principal`.
+- `pd.DataFrame()` converts the result into a DataFrame.
+- `X_principal.columns = ["P1", "P2"]` assigns names to the two principal components.
+- P1 and P2 are used for visualization and clustering.
+
+### Step 8: Visualize the Dendrogram
+
+- `plt.figure(figsize=(8, 8))` creates an 8 × 8 inch figure.
+- `plt.title()` sets the graph title.
+- `shc.linkage(X_principal, method="ward")` calculates hierarchical cluster merging information using Ward linkage.
+- `shc.dendrogram()` generates the dendrogram from the linkage information.
+- `plt.show()` displays the dendrogram.
+
+Dendrogram Interpretation:
+
+- Each leaf represents an individual data point.
+- Branches represent the merging of clusters.
+- The vertical height represents the distance at which clusters are merged.
+- A large vertical gap can help identify a suitable number of clusters.
+
+### Step 9: Perform Agglomerative Clustering
+
+The program performs clustering for five different values of K.
+
+K = 2:
+
+- `AgglomerativeClustering(n_clusters=2)` creates a model with two clusters.
+- `fit_predict(X_principal)` performs clustering and returns cluster labels.
+- `plt.scatter()` displays the data points using P1 and P2.
+- `c=labels2` assigns colours according to cluster membership.
+- `cmap="rainbow"` selects the colour map.
+- `plt.show()` displays the clustering result.
+
+K = 3:
+
+- Creates three clusters using `AgglomerativeClustering(n_clusters=3)`.
+- `fit_predict()` assigns each data point to a cluster.
+- The resulting clusters are displayed using a scatter plot.
+
+K = 4:
+
+- Creates four clusters.
+- Generates cluster labels and displays the corresponding scatter plot.
+
+K = 5:
+
+- Creates five clusters.
+- Assigns data points to five groups and visualizes them.
+
+K = 6:
+
+- Creates six clusters.
+- Generates the final clustering visualization.
+
+The same clustering procedure is repeated for K values 2, 3, 4, 5 and 6 to compare the results.
+
+### Step 10: Calculate Silhouette Scores
+
+- `k = [2, 3, 4, 5, 6]` stores the number of clusters being evaluated.
+- An empty list named `silhouette_scores` is created.
+- `silhouette_score(X_principal, labels2)` calculates the clustering quality for K = 2.
+- The same function calculates scores for K = 3, 4, 5 and 6.
+- Each score is stored in the `silhouette_scores` list.
+
+Silhouette Score Interpretation:
+
+- Close to +1: Data points are well matched to their own clusters.
+- Around 0: Clusters may overlap.
+- Negative value: Data points may be assigned to incorrect clusters.
+
+### Step 11: Plot Silhouette Scores
+
+- `plt.bar(k, silhouette_scores)` creates a bar graph comparing the scores.
+- `plt.xlabel()` labels the horizontal axis as Number of Clusters.
+- `plt.ylabel()` labels the vertical axis as Silhouette Score.
+- `plt.title()` sets the graph title.
+- `plt.show()` displays the comparison graph.
+- `np.argmax(silhouette_scores)` returns the index of the highest Silhouette Score.
+- `k[np.argmax(silhouette_scores)]` identifies the corresponding number of clusters.
+- The optimal cluster count is stored in `optimal_k`.
+- `print()` displays the optimal number of clusters.
+
+## 5. Functions and Libraries Used
+
+- `pd.read_csv()`: Loads a CSV dataset into a DataFrame.
+- `df.head()`: Displays the first five records.
+- `df.shape`: Returns the number of rows and columns.
+- `df.info()`: Displays dataset structure and data types.
+- `df.columns`: Returns the column names.
+- `df.isnull().sum()`: Counts missing values in each column.
+- `df.drop()`: Removes specified rows or columns.
+- `ffill()`: Fills missing values using the previous available value.
+- `StandardScaler()`: Creates an object for feature standardization.
+- `fit_transform()`: Learns parameters from the data and transforms it.
+- `normalize()`: Scales each sample to unit norm.
+- `PCA(n_components=2)`: Creates a PCA model with two principal components.
+- `fit_transform()`: Reduces the dataset into two principal components.
+- `shc.linkage()`: Calculates hierarchical cluster merging information.
+- `shc.dendrogram()`: Generates a tree-like visualization of hierarchical clustering.
+- `AgglomerativeClustering()`: Creates an Agglomerative Clustering model.
+- `fit_predict()`: Performs clustering and returns cluster labels.
+- `plt.figure()`: Creates a new plotting figure.
+- `plt.scatter()`: Creates a scatter plot.
+- `plt.bar()`: Creates a bar graph.
+- `plt.xlabel()`: Sets the horizontal axis label.
+- `plt.ylabel()`: Sets the vertical axis label.
+- `plt.title()`: Sets the graph title.
+- `plt.show()`: Displays the graph.
+- `silhouette_score()`: Calculates the Silhouette Score for clustering results.
+- `np.argmax()`: Returns the index of the maximum value in an array or list.
+
+## 6. Important Formulas and Calculations
+
+### 1. Euclidean Distance
+
+d(x, y) = √Σ(xᵢ - yᵢ)²
+
+- x and y represent two data points.
+- xᵢ and yᵢ represent their corresponding feature values.
+- It measures the distance between two data points.
+
+### 2. Standardization
+
+Z = (X - μ) / σ
+
+- X represents the original feature value.
+- μ represents the mean of the feature.
+- σ represents the standard deviation.
+- Z represents the standardized value.
+- It transforms features to approximately zero mean and unit variance.
+
+### 3. Normalization
+
+X_normalized = X / ||X||
+
+- X represents a data sample.
+- ||X|| represents its Euclidean norm.
+- It scales each sample to unit length.
+
+### 4. Ward Linkage
+
+Ward linkage merges the two clusters that produce the minimum increase in within-cluster sum of squares.
+
+ΔE = (n₁ × n₂ / (n₁ + n₂)) × ||μ₁ - μ₂||²
+
+- n₁ and n₂ represent the number of points in two clusters.
+- μ₁ and μ₂ represent their respective cluster means.
+- It selects the merge that causes the smallest increase in within-cluster variance.
+
+### 5. Silhouette Score
+
+S(i) = (b(i) - a(i)) / max(a(i), b(i))
+
+- a(i) represents the average distance of a data point from other points in its own cluster.
+- b(i) represents the minimum average distance from points in another cluster.
+- The score ranges from -1 to +1.
+- A higher score generally indicates better-separated and more compact clusters.
+
+### 6. Optimal Number of Clusters
+
+Optimal K = K corresponding to the maximum Silhouette Score.
+
+- The program compares scores for K = 2, 3, 4, 5 and 6.
+- `np.argmax()` identifies the highest score.
+- The corresponding K is selected as the optimal number of clusters.
+
+## 7. Program Logic and Execution Flow
+
+1. Install the required Python libraries.
+2. Import the required libraries and functions.
+3. Load the Wholesale Customers Dataset using its URL.
+4. Display dataset records, dimensions and missing values.
+5. Remove categorical columns Channel and Region.
+6. Fill missing values using forward filling.
+7. Standardize all numerical features.
+8. Normalize the standardized data.
+9. Apply PCA to reduce the data into two dimensions.
+10. Generate a dendrogram using Ward linkage.
+11. Perform Agglomerative Clustering for K = 2, 3, 4, 5 and 6.
+12. Visualize the clustering results using scatter plots.
+13. Calculate Silhouette Scores for all five clustering results.
+14. Compare the scores using a bar graph.
+15. Identify and display the optimal number of clusters.
+
+## 8. Output Explanation
+
+- First Five Records: Displays the first five customer records from the Wholesale Customers Dataset.
+- Dataset Shape: Displays the total number of customer records and attributes.
+- Dataset Information: Displays column names, data types and non-null counts.
+- Missing Values: Displays the number of missing values in each column.
+- PCA Result: Displays the first five records containing two principal components, P1 and P2.
+- Dendrogram: Displays the hierarchical merging structure of customer clusters using Ward linkage.
+- Clustering K = 2: Displays customers divided into two clusters.
+- Clustering K = 3: Displays customers divided into three clusters.
+- Clustering K = 4: Displays customers divided into four clusters.
+- Clustering K = 5: Displays customers divided into five clusters.
+- Clustering K = 6: Displays customers divided into six clusters.
+- Silhouette Scores: Displays the clustering quality for each value of K.
+- Silhouette Score Graph: Compares the scores using a bar graph.
+- Optimal Number of Clusters: Displays the K value having the highest Silhouette Score.
+
+Note:
+- The actual optimal K depends on the calculated Silhouette Scores.
+- The dendrogram and scatter plots provide visual representations of the clustering results.
+- PCA is applied before clustering, so the clustering is performed on the two-dimensional reduced dataset rather than the original features.
+
+## 9. Achievement of Objectives
+
+- Successfully implemented Agglomerative Hierarchical Clustering.
+- Loaded and analysed the Wholesale Customers Dataset.
+- Performed feature selection, missing value handling, standardization and normalization.
+- Reduced the dataset into two dimensions using PCA.
+- Visualized hierarchical relationships using a dendrogram.
+- Generated clusters for K values from 2 to 6.
+- Evaluated clustering quality using Silhouette Scores.
+- Identified the optimal number of clusters based on the highest Silhouette Score.
+
+## 10. Important Viva Questions and Answers
+
+1. What is Clustering?
+   - Clustering is an unsupervised learning technique that groups similar data points together.
+
+2. What is Hierarchical Clustering?
+   - It is a clustering technique that creates a hierarchy of clusters based on similarities between data points.
+
+3. What is Agglomerative Clustering?
+   - It is a bottom-up hierarchical clustering method in which individual data points are gradually merged into larger clusters.
+
+4. What is the difference between Agglomerative and Divisive Clustering?
+   - Agglomerative clustering starts with individual data points and merges them, whereas divisive clustering starts with one large cluster and splits it.
+
+5. What is a Dendrogram?
+   - It is a tree-like diagram that shows how clusters are merged at different distances.
+
+6. What is Ward Linkage?
+   - It is a method that merges clusters by minimizing the increase in within-cluster variance.
+
+7. What is PCA?
+   - Principal Component Analysis is a dimensionality reduction technique that converts original features into fewer principal components.
+
+8. Why is StandardScaler used?
+   - It standardizes features to approximately zero mean and unit standard deviation.
+
+9. What is the difference between Standardization and Normalization?
+   - Standardization transforms features using their mean and standard deviation, whereas normalization scales each sample to unit norm.
+
+10. What is a Silhouette Score?
+    - It measures how well data points fit within their assigned clusters compared to other clusters.
+
+11. What is the range of the Silhouette Score?
+    - It ranges from -1 to +1, where higher values generally indicate better clustering.
+
+12. Why is PCA used before clustering?
+    - It reduces the number of dimensions and makes the data easier to visualize and process.
+
+13. Why are Channel and Region removed?
+    - They are categorical attributes, whereas this implementation performs clustering using numerical purchasing features.
+
+14. How is the optimal number of clusters selected?
+    - The K value with the highest Silhouette Score is selected.
+
+15. Which dataset is used in this practical?
+    - The Wholesale Customers Dataset from the UCI Machine Learning Repository.

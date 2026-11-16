@@ -1,0 +1,434 @@
+
+# Practical 2: Document Retrieval Using Inverted Files
+
+# IMPORTANT INSTRUCTIONS:
+#
+# Before running this program, create a text file locally.
+#
+# 1. Open Notepad.
+# 2. Copy and paste the following text:
+#
+# This is the first word.
+# This is the second text, Hello! How are you?
+# This is the third, this is it now.
+#
+# 3. Save the file as text.txt
+# 4. For Jupyter Notebook, save text.txt in the same
+#    folder where your notebook is saved.
+# 5. For Google Colab, upload text.txt when asked.
+#
+# IMPORTANT:
+# Activate only one file-loading method depending
+# on the environment you are using.
+
+
+# Step 1: Install required library
+
+# Jupyter Notebook
+# Install using terminal:
+# %pip install nltk
+
+# Google Colab
+!pip install nltk
+
+
+# Step 2: Import required libraries
+
+import nltk
+import string
+
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+
+
+# Step 3: Download required NLTK resources
+
+nltk.download('punkt')
+nltk.download('punkt_tab')
+nltk.download('stopwords')
+
+
+# Step 4: Read the text file
+
+# Method 1: Jupyter Notebook (DEFAULT)
+
+file = open("text.txt", "r", encoding="utf-8")
+array = file.readlines()
+
+# Method 2: Google Colab (ALTERNATIVE)
+'''
+from google.colab import files
+uploaded = files.upload()
+filename = list(uploaded.keys())[0]
+file = open(filename, "r", encoding="utf-8")
+array = file.readlines()
+
+'''
+# Step 5: Count the number of lines
+
+line = len(array)
+
+print("Number of lines in file is:", line)
+
+
+# Step 6: Display original lines
+
+print("\nOriginal Lines:")
+print(array)
+
+
+# Step 7: Remove punctuation
+
+punc = string.punctuation
+
+for i in range(len(array)):
+    for ele in punc:
+        array[i] = array[i].replace(ele, " ")
+
+print("\nAfter Removing Punctuation:")
+print(array)
+
+
+# Step 8: Convert text into lowercase
+
+for i in range(len(array)):
+    array[i] = array[i].lower()
+
+print("\nAfter Lowercase Conversion:")
+print(array)
+
+
+# Step 9: Tokenization
+
+tokens = []
+
+for i in range(len(array)):
+    words = word_tokenize(array[i])
+    tokens.append(words)
+
+print("\nTokenized Data:")
+print(tokens)
+
+
+# Step 10: Remove Stop Words
+
+stop_words = set(stopwords.words('english'))
+
+tokens_without_sw = []
+
+for i in range(len(tokens)):
+    for word in tokens[i]:
+        if word.isalpha() and word not in stop_words:
+            tokens_without_sw.append(word)
+
+print("\nTokens Without Stop Words:")
+print(tokens_without_sw)
+
+
+# Step 11: Create an Inverted Index
+
+inverted_index = {}
+
+for i in range(len(tokens)):
+    for item in tokens[i]:
+
+        if item.isalpha() and item not in stop_words:
+
+            if item not in inverted_index:
+                inverted_index[item] = []
+
+            if (i + 1) not in inverted_index[item]:
+                inverted_index[item].append(i + 1)
+
+print("\nInverted Index:")
+print(inverted_index)
+
+
+# Step 12: Close the file
+
+file.close()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+///////////////////////////////////////////////////////
+
+# PRACTICAL NO. 2: DOCUMENT RETRIEVAL USING INVERTED FILES
+
+## 1. Aim
+
+- To implement a program for retrieving documents using inverted files.
+- The practical creates an inverted index that stores each word along with the line numbers in which it appears, making document searching and retrieval easier.
+
+## 2. Objectives
+
+- To evaluate and analyse retrieved information.
+- To study indexing and inverted files.
+- To understand how searching and document retrieval are performed using an inverted index.
+
+## 3. Theory and Important Concepts
+
+- Information Retrieval: It is the process of searching and retrieving relevant information from a collection of documents.
+- Document Collection: A group of text documents from which information is retrieved.
+- Document Indexing: The process of organizing words and their locations in documents for faster searching.
+- Inverted Index: A data structure that stores each unique word along with the list of document locations or line numbers where it appears.
+- Forward Index: Stores each document along with the words present in it.
+- Inverted Index: Stores each word along with the documents or locations in which it appears.
+- Hash Map: A data structure that stores information in key-value pairs. In Python, dictionaries are used to implement it.
+- Key: The unique word stored in the inverted index.
+- Value: The list of line numbers where that word appears.
+- Tokenization: Divides text into individual words called tokens.
+- Stop Words: Common words such as is, the, are and it that are removed because they usually carry less importance in searching.
+- Punctuation Removal: Removes symbols such as commas, full stops and question marks from text.
+- Lowercase Conversion: Converts all words into lowercase to maintain uniformity.
+- Document Retrieval: Uses the index to locate documents or lines containing the searched word.
+
+Example of an Inverted Index:
+
+- Document 1: This is the first word.
+- Document 2: This is the second text.
+- Document 3: This is the third word.
+
+Inverted Index:
+- first → [1]
+- word → [1, 3]
+- second → [2]
+- text → [2]
+- third → [3]
+
+Here, each word points to the line numbers where it occurs.
+
+## 4. Code Explanation
+
+### Step 1: Install Required Library
+
+- NLTK is installed using pip.
+- It provides functions for tokenization and stop word removal.
+- The active installation command in the given code is `!pip install nltk`, which is suitable for Google Colab.
+
+### Step 2: Import Required Libraries
+
+- `nltk`: Provides Natural Language Processing tools.
+- `string`: Provides predefined punctuation characters.
+- `word_tokenize`: Divides text into individual words.
+- `stopwords`: Provides predefined lists of common English words.
+
+### Step 3: Download Required NLTK Resources
+
+- `punkt`: Provides tokenizer data.
+- `punkt_tab`: Provides additional tokenizer data required by newer NLTK versions.
+- `stopwords`: Downloads the predefined English stop word list.
+
+### Step 4: Read the Text File
+
+- `open("text.txt", "r", encoding="utf-8")` opens the text file in read mode.
+- `encoding="utf-8"` supports standard text characters.
+- `file.readlines()` reads all lines from the file and stores them in the list `array`.
+- Each element of the list represents one line.
+
+Google Colab Alternative:
+- `files.upload()` allows the user to upload a local text file.
+- `uploaded.keys()` retrieves the uploaded filename.
+- `list(uploaded.keys())[0]` selects the uploaded filename.
+- The selected file is opened and its lines are stored in `array`.
+- Only one file-loading method should be activated at a time.
+
+### Step 5: Count the Number of Lines
+
+- `len(array)` calculates the total number of lines in the file.
+- The result is stored in the variable `line`.
+- `print()` displays the total number of lines.
+
+### Step 6: Display Original Lines
+
+- `print(array)` displays the original contents of the text file.
+- Each line is stored as a separate element in the list.
+
+### Step 7: Remove Punctuation
+
+- `string.punctuation` provides a collection of punctuation characters.
+- A nested loop processes every line and punctuation character.
+- `replace(ele, " ")` replaces each punctuation character with a space.
+- The cleaned lines are stored back in `array`.
+
+### Step 8: Convert Text into Lowercase
+
+- A loop processes every line in the array.
+- `lower()` converts all characters into lowercase.
+- This maintains uniformity during indexing and searching.
+
+### Step 9: Tokenization
+
+- An empty list named `tokens` is created.
+- `word_tokenize(array[i])` divides each line into individual words.
+- The generated words are stored in the variable `words`.
+- `tokens.append(words)` stores each line's tokens as a separate list.
+- Therefore, tokens is a nested list containing words from every line.
+
+### Step 10: Remove Stop Words
+
+- `stopwords.words('english')` retrieves the English stop word list.
+- `set()` stores the stop words for efficient checking.
+- An empty list named `tokens_without_sw` is created.
+- A nested loop processes every token.
+- `word.isalpha()` checks whether the token contains only alphabetic characters.
+- `word not in stop_words` checks whether the token is not a stop word.
+- Only meaningful words are added to `tokens_without_sw`.
+
+### Step 11: Create an Inverted Index
+
+- An empty dictionary named `inverted_index` is created.
+- The outer loop processes each line using its index `i`.
+- The inner loop processes every word present in that line.
+- `item.isalpha()` checks whether the word contains only alphabetic characters.
+- `item not in stop_words` ensures that stop words are excluded.
+- `if item not in inverted_index` checks whether the word is already present as a key.
+- `inverted_index[item] = []` creates an empty list for a new word.
+- `inverted_index[item].append(i + 1)` stores the line number where the word appears.
+- `i + 1` is used because Python indexing starts from 0, whereas line numbering starts from 1.
+- The condition `(i + 1) not in inverted_index[item]` prevents duplicate line numbers.
+- Finally, `print(inverted_index)` displays the generated inverted index.
+
+### Step 12: Close the File
+
+- `file.close()` closes the opened text file.
+- It releases the file resource after reading is completed.
+
+## 5. Functions and Libraries Used
+
+- `nltk`: Python library used for Natural Language Processing.
+- `string.punctuation`: Returns a string containing common punctuation characters.
+- `nltk.download()`: Downloads the required NLTK resources.
+- `open()`: Opens a file in the specified mode.
+- `readlines()`: Reads all lines from a file and returns them as a list.
+- `len()`: Returns the total number of elements in a list.
+- `replace()`: Replaces a specified character or substring with another value.
+- `lower()`: Converts a string into lowercase.
+- `word_tokenize()`: Divides a sentence or text into individual tokens.
+- `stopwords.words('english')`: Returns the predefined English stop word list.
+- `set()`: Creates a collection of unique elements and supports efficient membership checking.
+- `isalpha()`: Checks whether a string contains only alphabetic characters.
+- `append()`: Adds an element to the end of a list.
+- `range()`: Generates a sequence of numbers used for loop execution.
+- `file.close()`: Closes the opened file.
+
+## 6. Important Formulas and Calculations
+
+- No mathematical formulas are used in this practical.
+- The inverted index is created using a dictionary and lists.
+- The key represents a word, and its value represents the line numbers containing that word.
+
+Example:
+
+`inverted_index["hello"] = [2]`
+
+- Here, hello is the key and 2 is the value indicating that the word appears in line 2.
+
+## 7. Program Logic and Execution Flow
+
+1. Install the NLTK library.
+2. Import the required libraries and functions.
+3. Download the necessary NLTK resources.
+4. Create and read the text file.
+5. Count and display the total number of lines.
+6. Display the original text.
+7. Remove punctuation from every line.
+8. Convert all text into lowercase.
+9. Tokenize each line into individual words.
+10. Remove stop words and non-alphabetic tokens.
+11. Create an inverted index using a dictionary.
+12. Store each word with its corresponding line numbers.
+13. Display the final inverted index.
+14. Close the text file.
+
+## 8. Output Explanation
+
+- Number of Lines: Displays 3 because the input text file contains three lines.
+- Original Lines: Displays the contents of the text file before preprocessing.
+- After Removing Punctuation: Displays the text after removing punctuation marks.
+- After Lowercase Conversion: Displays all text in lowercase.
+- Tokenized Data: Displays individual words arranged separately for each line.
+- Tokens Without Stop Words: Displays meaningful words after removing common English stop words and non-alphabetic tokens.
+- Inverted Index: Displays each unique word with its corresponding line numbers.
+
+Expected Inverted Index for the Given Text:
+
+- first → [1]
+- word → [1]
+- second → [2]
+- text → [2]
+- hello → [2]
+- third → [3]
+- now → [3]
+
+Note:
+- The output depends on the English stop word list provided by NLTK.
+- The word this, along with words such as is, the, it, how, are and you, is removed during preprocessing.
+- Duplicate occurrences of a word in the same line are stored only once in the inverted index.
+
+## 9. Achievement of Objectives
+
+- Successfully studied document indexing and inverted files.
+- Performed text preprocessing by removing punctuation and converting text into lowercase.
+- Applied tokenization to divide document lines into individual words.
+- Removed unnecessary stop words using NLTK.
+- Created an inverted index using a Python dictionary.
+- Stored each unique word with its corresponding line numbers.
+- Demonstrated the basic structure required for efficient document searching and retrieval.
+
+## 10. Important Viva Questions and Answers
+
+1. What is an Inverted Index?
+   - It is a data structure that stores each word along with the list of documents or locations where it appears.
+
+2. Why is an inverted index used?
+   - It helps retrieve relevant documents quickly without searching every document word by word.
+
+3. What is the difference between a Forward Index and an Inverted Index?
+   - A Forward Index maps documents to words, whereas an Inverted Index maps words to documents.
+
+4. What is Document Indexing?
+   - It is the process of organizing document contents into a searchable data structure.
+
+5. Which Python data structure is used to create the inverted index?
+   - A dictionary is used, where words are keys and line numbers are values.
+
+6. Why is Tokenization performed?
+   - It divides text into individual words so that they can be processed and indexed separately.
+
+7. Why are Stop Words removed?
+   - They are common words that generally carry less importance and can increase unnecessary indexing.
+
+8. Why is lowercase conversion performed?
+   - It ensures that words with different letter cases are treated uniformly.
+
+9. Why is `i + 1` used while storing line numbers?
+   - Python list indexing starts from 0, but actual line numbering starts from 1.
+
+10. What is the advantage of an Inverted Index?
+    - It reduces searching time by directly locating the documents or lines containing a particular word.

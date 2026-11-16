@@ -1,0 +1,335 @@
+
+# Practical 1: Text Preprocessing
+# Stop Word Removal and Stemming
+
+# Step 1: Install required library
+
+# Jupyter Notebook
+# Install using terminal:
+# %pip install nltk
+
+# Google Colab
+# !pip install nltk
+
+
+# Step 2: Import required libraries
+
+import nltk
+
+from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer, WordNetLemmatizer
+
+
+# Step 3: Download required NLTK resources
+
+nltk.download('punkt')
+nltk.download('punkt_tab')
+nltk.download('stopwords')
+nltk.download('wordnet')
+nltk.download('averaged_perceptron_tagger_eng')
+
+
+# Step 4: Input text document
+
+text = """Information retrieval is an important
+field of computer science.
+Students are learning different techniques
+for retrieving useful information.
+They are studying preprocessing and processing."""
+
+
+print("Original Text:")
+print(text)
+
+
+# Step 5: Sentence Segmentation
+
+sentences = sent_tokenize(text)
+
+print("\nSentence Segmentation:")
+print(sentences)
+
+
+# Step 6: Tokenization
+
+words = word_tokenize(text)
+
+print("\nWord Tokenization:")
+print(words)
+
+
+# Step 7: Convert text into lowercase
+
+words = []
+
+for word in word_tokenize(text):
+    words.append(word.lower())
+
+print("\nLowercase Words:")
+print(words)
+
+
+# Step 8: Remove Stop Words
+
+stop_words = set(stopwords.words('english'))
+
+filtered_words = []
+
+for word in words:
+    if word.isalpha() and word not in stop_words:
+        filtered_words.append(word)
+
+print("\nAfter Stop Word Removal:")
+print(filtered_words)
+
+
+# Step 9: Stemming
+
+ps = PorterStemmer()
+
+stemmed_words = []
+
+for word in filtered_words:
+    stemmed_words.append(ps.stem(word))
+
+print("\nAfter Stemming:")
+print(stemmed_words)
+
+
+# Step 10: Lemmatization
+
+lemmatizer = WordNetLemmatizer()
+
+lemmatized_words = []
+
+for word in filtered_words:
+    lemmatized_words.append(lemmatizer.lemmatize(word))
+
+print("\nAfter Lemmatization:")
+print(lemmatized_words)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/////////////////////////////////////////////////////////////
+
+# PRACTICAL NO. 1: TEXT PREPROCESSING - STOP WORD REMOVAL AND STEMMING
+
+## 1. Aim
+
+- To perform text preprocessing on a text document using NLTK.
+- The practical removes unnecessary words, converts text into lowercase and applies stemming and lemmatization to prepare text for further information retrieval tasks.
+
+## 2. Objectives
+
+- To understand the concepts of Information Retrieval and Web Mining.
+- To learn text preprocessing techniques used to clean and prepare textual data.
+- To perform sentence segmentation and word tokenization.
+- To remove stop words and apply stemming and lemmatization.
+
+## 3. Theory and Important Concepts
+
+- Text Preprocessing: It is the process of converting raw text into a clean and structured format for further analysis.
+- NLP (Natural Language Processing): It enables computers to understand, process and analyze human language.
+- Sentence Segmentation: Divides a paragraph into individual sentences.
+- Tokenization: Divides text into smaller units called tokens, such as words or sentences.
+- Lowercase Conversion: Converts all text into lowercase to maintain uniformity.
+- Stop Words: Common words such as is, the, are, and, of that usually carry less importance in information retrieval.
+- Stop Word Removal: Removes frequently occurring unnecessary words to reduce text size and improve processing.
+- Stemming: Reduces words to their root or base form by removing prefixes or suffixes. Example: learning becomes learn.
+- Lemmatization: Converts words into their meaningful dictionary base form. Example: better becomes good when using the appropriate word context and POS.
+- Porter Stemmer: An algorithm used to remove common suffixes and reduce words to their stems.
+- WordNet Lemmatizer: Uses the WordNet dictionary to convert words into their meaningful base forms.
+
+Difference Between Stemming and Lemmatization:
+
+- Stemming removes word endings using simple rules and may produce non-dictionary words.
+- Lemmatization uses vocabulary and linguistic information to produce meaningful dictionary words.
+- Example: Studies becomes studi through stemming and study through lemmatization.
+
+## 4. Code Explanation
+
+### Step 1: Install Required Library
+
+- NLTK is installed using pip.
+- It provides tools for text preprocessing and Natural Language Processing.
+
+### Step 2: Import Required Libraries
+
+- `nltk`: Main library for Natural Language Processing.
+- `sent_tokenize`: Divides text into sentences.
+- `word_tokenize`: Divides text into individual words and punctuation.
+- `stopwords`: Provides predefined lists of common words.
+- `PorterStemmer`: Performs stemming.
+- `WordNetLemmatizer`: Performs lemmatization.
+
+### Step 3: Download Required NLTK Resources
+
+- `punkt`: Provides the tokenizer data required for sentence and word tokenization.
+- `punkt_tab`: Provides additional tokenizer data required by newer NLTK versions.
+- `stopwords`: Downloads predefined stop word lists.
+- `wordnet`: Provides dictionary data for lemmatization.
+- `averaged_perceptron_tagger_eng`: Provides English POS tagging data, but it is not used in this program.
+
+### Step 4: Input Text Document
+
+- A multiline text document is stored in the variable `text`.
+- The original text contains sentences related to Information Retrieval.
+- `print()` displays the original document.
+
+### Step 5: Sentence Segmentation
+
+- `sent_tokenize(text)` divides the input paragraph into individual sentences.
+- The sentences are stored in the `sentences` variable.
+- Each sentence is displayed separately.
+
+### Step 6: Tokenization
+
+- `word_tokenize(text)` divides the complete text into individual words and punctuation marks.
+- The resulting tokens are stored in the `words` variable.
+- This makes further text processing easier.
+
+### Step 7: Convert Text into Lowercase
+
+- An empty list named `words` is created.
+- A loop processes each token generated by `word_tokenize()`.
+- `word.lower()` converts every token into lowercase.
+- The converted words are stored using `append()`.
+
+### Step 8: Remove Stop Words
+
+- `stopwords.words('english')` retrieves the predefined English stop word list.
+- `set()` stores the stop words in a set for efficient membership checking.
+- An empty list named `filtered_words` is created.
+- `word.isalpha()` checks whether a token contains only alphabetic characters.
+- `word not in stop_words` checks whether the word is not a stop word.
+- Only meaningful alphabetic words are stored in `filtered_words`.
+
+### Step 9: Stemming
+
+- `PorterStemmer()` creates a Porter Stemmer object.
+- An empty list named `stemmed_words` is created.
+- A loop processes each filtered word.
+- `ps.stem(word)` removes common word endings to generate word stems.
+- The resulting stems are stored in `stemmed_words`.
+
+### Step 10: Lemmatization
+
+- `WordNetLemmatizer()` creates a lemmatizer object.
+- An empty list named `lemmatized_words` is created.
+- A loop processes each filtered word.
+- `lemmatizer.lemmatize(word)` converts words into their dictionary base forms.
+- The resulting words are stored in `lemmatized_words`.
+
+Note: The lemmatizer uses noun as its default POS. Therefore, some verbs may not be converted into their expected base forms.
+
+## 5. Functions and Libraries Used
+
+- `nltk`: Main Python library for Natural Language Processing.
+- `nltk.download()`: Downloads required NLTK datasets and resources.
+- `sent_tokenize(text)`: Splits text into individual sentences.
+- `word_tokenize(text)`: Splits text into individual word tokens.
+- `stopwords.words('english')`: Returns the predefined English stop word list.
+- `set()`: Creates a collection of unique elements and supports efficient membership checking.
+- `word.lower()`: Converts a word into lowercase.
+- `word.isalpha()`: Checks whether a token contains only alphabetic characters.
+- `PorterStemmer()`: Creates an object for performing stemming.
+- `ps.stem(word)`: Converts a word into its stem.
+- `WordNetLemmatizer()`: Creates an object for performing lemmatization.
+- `lemmatizer.lemmatize(word)`: Converts a word into its dictionary base form. Its default POS is noun.
+- `append()`: Adds an element to the end of a list.
+
+## 6. Important Formulas and Calculations
+
+- No mathematical formulas are used in this practical.
+- Text preprocessing is performed using NLTK functions and algorithms.
+- Stemming and lemmatization are linguistic processing techniques rather than mathematical calculations.
+
+## 7. Program Logic and Execution Flow
+
+1. Install the NLTK library.
+2. Import the required NLTK modules.
+3. Download the necessary language resources.
+4. Store the input text document.
+5. Divide the document into individual sentences.
+6. Convert the text into individual word tokens.
+7. Convert all tokens into lowercase.
+8. Remove stop words and non-alphabetic tokens.
+9. Apply Porter Stemming to generate word stems.
+10. Apply WordNet Lemmatization to generate dictionary base forms.
+11. Display the results after each preprocessing operation.
+
+## 8. Output Explanation
+
+- Original Text: Displays the input document containing three sentences.
+- Sentence Segmentation: Displays the three individual sentences.
+- Word Tokenization: Displays individual words along with punctuation marks.
+- Lowercase Words: Displays all tokens converted into lowercase.
+- After Stop Word Removal: Displays meaningful alphabetic words after removing stop words and punctuation.
+- After Stemming: Displays reduced word forms such as:
+  - retrieving → retriev
+  - information → inform
+  - different → differ
+  - techniques → techniqu
+- After Lemmatization: Displays dictionary base forms wherever the default noun-based lemmatization can identify them.
+- The output demonstrates how raw text is converted into a cleaner format for Information Retrieval.
+
+## 9. Achievement of Objectives
+
+- Understood the basic concepts of Information Retrieval and text preprocessing.
+- Successfully performed sentence segmentation and word tokenization.
+- Converted text into lowercase for uniformity.
+- Removed unnecessary stop words and punctuation.
+- Applied Porter Stemmer to reduce words to their stems.
+- Applied WordNet Lemmatizer to obtain dictionary base forms.
+- Successfully demonstrated important NLP preprocessing techniques using NLTK.
+
+## 10. Important Viva Questions and Answers
+
+1. What is Text Preprocessing?
+   - It is the process of cleaning and transforming raw text into a structured format for analysis.
+
+2. What is NLTK?
+   - NLTK stands for Natural Language Toolkit. It is a Python library used for Natural Language Processing.
+
+3. What is Tokenization?
+   - It is the process of dividing text into smaller units called tokens.
+
+4. What is the difference between sentence tokenization and word tokenization?
+   - Sentence tokenization divides text into sentences, whereas word tokenization divides text into individual words and punctuation.
+
+5. What are Stop Words?
+   - Stop words are commonly occurring words such as is, the, are and of that are often removed during text preprocessing.
+
+6. What is Stemming?
+   - Stemming reduces words to their root-like forms by removing prefixes or suffixes.
+
+7. What is Porter Stemmer?
+   - It is a rule-based stemming algorithm used to remove common suffixes from words.
+
+8. What is Lemmatization?
+   - It converts words into their meaningful dictionary base forms.
+
+9. What is the difference between Stemming and Lemmatization?
+   - Stemming uses simple rules and may produce invalid words, whereas lemmatization uses vocabulary and linguistic information to produce meaningful words.
+
+10. Why is lowercase conversion performed?
+    - It maintains uniformity and prevents the same word with different letter cases from being treated as separate words.

@@ -1,0 +1,610 @@
+
+# Practical 4: E-mail Spam Filtering Using KNN Algorithm
+
+# Step 1: Install required libraries
+
+# Jupyter Notebook (DEFAULT)
+# %pip install nltk pandas numpy scikit-learn requests
+
+# Google Colab (ALTERNATIVE)
+!pip install nltk pandas numpy scikit-learn requests
+
+
+# Step 2: Import required libraries
+
+import os
+import io
+import tarfile
+import requests
+import nltk
+import pandas as pd
+import numpy as np
+
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import accuracy_score, precision_score
+from sklearn.metrics import recall_score
+
+
+# Step 3: Download required NLTK resources
+
+nltk.download('punkt')
+nltk.download('punkt_tab')
+nltk.download('stopwords')
+
+
+# Step 4: Download and Extract Enron Email Dataset
+
+url = "http://www2.aueb.gr/users/ion/data/enron-spam/preprocessed/enron1.tar.gz"
+
+# Added verify=False to bypass SSL certification errors
+response = requests.get(url, verify=False)
+response.raise_for_status()
+
+with tarfile.open(fileobj=io.BytesIO(response.content), mode="r:gz") as tar:
+    tar.extractall("dataset")
+
+print("Enron1 Dataset Downloaded and Extracted Successfully")
+
+
+# Step 5: Read Email Messages
+
+folder_path = os.path.join("dataset", "enron1")
+
+emails = []
+labels = []
+
+for category in ["ham", "spam"]:
+
+    category_path = os.path.join(folder_path, category)
+
+    for filename in os.listdir(category_path):
+
+        file_path = os.path.join(category_path, filename)
+
+        if os.path.isfile(file_path):
+
+            file = open(file_path, "r", encoding="latin-1")
+            message = file.read()
+            file.close()
+
+            emails.append(message)
+            labels.append(category)
+
+
+# Step 6: Create and Display Dataset
+
+df = pd.DataFrame({
+    "label": labels,
+    "message": emails
+})
+
+print("\nSample Email Dataset:")
+print(df.head())
+
+print("\nDataset Shape:")
+print(df.shape)
+
+print("\nClass Distribution:")
+print(df["label"].value_counts())
+
+
+# Step 7: Preprocessing of Email Content
+
+stop_words = set(stopwords.words('english'))
+
+ps = PorterStemmer()
+
+def preprocess(text):
+
+    text = text.lower()
+
+    words = word_tokenize(text)
+
+    filtered_words = []
+
+    for word in words:
+
+        if word.isalpha() and word not in stop_words:
+
+            stemmed_word = ps.stem(word)
+
+            filtered_words.append(stemmed_word)
+
+    return " ".join(filtered_words)
+
+
+df["clean_message"] = df["message"].apply(preprocess)
+
+print("\nPreprocessed Emails:")
+print(df[["label", "clean_message"]].head())
+
+
+# Step 8: Feature Extraction
+
+vectorizer = CountVectorizer()
+
+X = vectorizer.fit_transform(df["clean_message"])
+
+y = df["label"]
+
+print("\nFeature Matrix Shape:")
+print(X.shape)
+
+
+# Step 9: Split Training and Testing Data
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
+)
+
+print("\nTraining Data:", X_train.shape)
+print("Testing Data:", X_test.shape)
+
+
+# Step 10: KNN Implementation
+
+knn = KNeighborsClassifier(
+    n_neighbors=5,
+    metric='euclidean'
+)
+
+knn.fit(X_train, y_train)
+
+y_pred = knn.predict(X_test)
+
+print("\nEmail Classification Results:")
+print(y_pred)
+
+
+# Step 11: Performance Analysis
+
+cm = confusion_matrix(
+    y_test, y_pred,
+    labels=["ham", "spam"]
+)
+
+tn, fp, fn, tp = cm.ravel()
+
+accuracy = accuracy_score(y_test, y_pred)
+
+precision = precision_score(
+    y_test, y_pred,
+    pos_label="spam",
+    zero_division=0
+)
+
+sensitivity = recall_score(
+    y_test, y_pred,
+    pos_label="spam",
+    zero_division=0
+)
+
+specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+
+print("\nConfusion Matrix:")
+print(cm)
+
+print("\nPerformance Analysis:")
+print("Accuracy:", accuracy)
+print("Precision:", precision)
+print("Sensitivity:", sensitivity)
+print("Specificity:", specificity)
+
+
+# Step 12: Test a New Email
+
+new_email = ["Congratulations! You have won a free prize"]
+
+clean_email = preprocess(new_email[0])
+
+email_vector = vectorizer.transform([clean_email])
+
+prediction = knn.predict(email_vector)
+
+print("\nNew Email Classification:")
+print(prediction[0])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+////////////////////////////////////////////////////////
+
+
+# PRACTICAL NO. 4: E-MAIL SPAM FILTERING USING KNN ALGORITHM
+
+## 1. Aim
+
+- To implement an E-mail Spam Filtering system using the K-Nearest Neighbors (KNN) algorithm.
+- The practical classifies emails into two categories: Spam (unwanted emails) and Ham (legitimate emails) using text preprocessing and machine learning.
+
+## 2. Objectives
+
+- To understand the concept of email spam filtering.
+- To study the K-Nearest Neighbors classification algorithm.
+- To preprocess email text using tokenization, stop word removal and stemming.
+- To convert email text into numerical features using CountVectorizer.
+- To train and test the KNN classification model.
+- To evaluate the model using accuracy, precision, sensitivity and specificity.
+
+## 3. Theory and Important Concepts
+
+- Spam Filtering: It is the process of identifying unwanted or fraudulent emails and separating them from legitimate emails.
+- Ham: Refers to genuine and legitimate emails.
+- Spam: Refers to unwanted emails that may contain advertisements, suspicious links or fraudulent messages.
+- Enron Email Dataset: A collection of real-world email messages used for developing and testing email classification systems.
+- Text Preprocessing: The process of cleaning raw email text before applying machine learning.
+- Tokenization: Divides email text into individual words.
+- Stop Word Removal: Removes common words such as is, the, are and of.
+- Stemming: Reduces words to their root-like forms using algorithms such as Porter Stemmer.
+- Feature Extraction: Converts textual data into numerical values that can be processed by machine learning algorithms.
+- Bag of Words (BoW): Represents text using word occurrence counts without considering word order.
+- CountVectorizer: Converts text documents into a numerical matrix based on the frequency of words.
+- KNN (K-Nearest Neighbors): A supervised machine learning algorithm that classifies a new data point based on the majority class of its nearest neighbours.
+- Euclidean Distance: Measures the straight-line distance between two numerical feature vectors.
+- Training Data: The portion of the dataset used to train the classification model.
+- Testing Data: The portion used to evaluate the model on unseen data.
+- Classification: Assigning an input email to a predefined category such as spam or ham.
+
+### Working of KNN Algorithm
+
+1. Store the training email feature vectors with their labels.
+2. Calculate the distance between a new email and all training emails.
+3. Select the K nearest neighbours.
+4. Identify the class labels of these neighbours.
+5. Assign the majority class to the new email.
+
+### Important Performance Metrics
+
+- Accuracy: Measures the overall percentage of correctly classified emails.
+- Precision: Measures how many emails predicted as spam are actually spam.
+- Sensitivity: Measures how many actual spam emails are correctly identified.
+- Specificity: Measures how many actual ham emails are correctly identified.
+
+## 4. Code Explanation
+
+### Step 1: Install Required Libraries
+
+- NLTK is used for text preprocessing.
+- Pandas is used for dataset handling.
+- NumPy is used for numerical operations.
+- Scikit-learn is used for feature extraction, classification and performance evaluation.
+- Requests is used to download the email dataset.
+
+### Step 2: Import Required Libraries
+
+- `os`: Performs file and directory operations.
+- `io`: Handles data in memory using byte streams.
+- `tarfile`: Extracts the downloaded compressed dataset.
+- `requests`: Downloads the Enron dataset from the internet.
+- `nltk`: Provides Natural Language Processing tools.
+- `pandas`: Handles email data using DataFrames.
+- `numpy`: Supports numerical operations.
+- `word_tokenize`: Divides email text into individual words.
+- `stopwords`: Provides predefined English stop words.
+- `PorterStemmer`: Performs stemming.
+- `train_test_split`: Divides data into training and testing sets.
+- `CountVectorizer`: Converts email text into numerical feature vectors.
+- `KNeighborsClassifier`: Implements the KNN algorithm.
+- `confusion_matrix`: Generates a confusion matrix.
+- `accuracy_score`: Calculates classification accuracy.
+- `precision_score`: Calculates precision.
+- `recall_score`: Calculates recall or sensitivity.
+
+### Step 3: Download Required NLTK Resources
+
+- `punkt`: Provides tokenizer data.
+- `punkt_tab`: Provides additional tokenizer data required by newer NLTK versions.
+- `stopwords`: Downloads the English stop word list.
+
+### Step 4: Download and Extract Enron Email Dataset
+
+- The dataset URL points to the compressed Enron1 email dataset.
+- `requests.get(url, verify=False)` downloads the dataset while disabling SSL certificate verification.
+- `response.raise_for_status()` checks whether the download request was successful.
+- `io.BytesIO(response.content)` stores the downloaded data as an in-memory byte stream.
+- `tarfile.open()` opens the compressed TAR.GZ archive.
+- `extractall("dataset")` extracts the dataset into the dataset folder.
+- The program displays a success message after extraction.
+
+### Step 5: Read Email Messages
+
+- `os.path.join()` creates the correct folder paths.
+- Two empty lists, `emails` and `labels`, are created.
+- The loop processes two categories: ham and spam.
+- `os.listdir()` retrieves filenames from each category folder.
+- `os.path.isfile()` checks whether the selected path is a file.
+- `open()` opens each email using read mode and Latin-1 encoding.
+- `file.read()` reads the complete email content.
+- `emails.append(message)` stores the email content.
+- `labels.append(category)` stores its corresponding spam or ham label.
+
+### Step 6: Create and Display Dataset
+
+- `pd.DataFrame()` creates a DataFrame using email messages and their labels.
+- The DataFrame contains two columns: label and message.
+- `df.head()` displays the first five records.
+- `df.shape` displays the total number of rows and columns.
+- `df["label"].value_counts()` displays the number of spam and ham emails.
+
+### Step 7: Preprocessing of Email Content
+
+- `stopwords.words('english')` retrieves English stop words.
+- `set()` stores the stop words for efficient checking.
+- `PorterStemmer()` creates a stemming object.
+
+The preprocess() Function:
+
+- `text.lower()` converts the email into lowercase.
+- `word_tokenize(text)` divides the email into individual words.
+- An empty list named `filtered_words` is created.
+- `word.isalpha()` checks whether a token contains only alphabetic characters.
+- `word not in stop_words` removes common English stop words.
+- `ps.stem(word)` converts each remaining word into its stem.
+- `filtered_words.append(stemmed_word)` stores the processed words.
+- `" ".join(filtered_words)` combines the processed words into a single string.
+- `df["message"].apply(preprocess)` applies preprocessing to every email.
+- The cleaned email content is stored in a new column called `clean_message`.
+
+### Step 8: Feature Extraction
+
+- `CountVectorizer()` creates a Bag of Words feature extractor.
+- `fit_transform()` learns the vocabulary and converts every email into a numerical feature matrix.
+- Each column represents a unique word.
+- Each row represents an email.
+- The matrix `X` stores the numerical email features.
+- `y = df["label"]` stores the corresponding spam and ham labels.
+- `X.shape` displays the dimensions of the feature matrix.
+
+### Step 9: Split Training and Testing Data
+
+- `train_test_split()` divides the dataset into training and testing sets.
+- `X` contains the email features.
+- `y` contains the corresponding labels.
+- `test_size=0.2` reserves 20% of the data for testing.
+- `random_state=42` ensures reproducible splitting.
+- `stratify=y` maintains the same class distribution in both sets.
+- `X_train` and `y_train` contain training features and labels.
+- `X_test` and `y_test` contain testing features and labels.
+
+### Step 10: KNN Implementation
+
+- `KNeighborsClassifier()` creates the KNN classification model.
+- `n_neighbors=5` selects the five nearest neighbours.
+- `metric='euclidean'` uses Euclidean distance to measure similarity.
+- `knn.fit(X_train, y_train)` trains the model using training data.
+- `knn.predict(X_test)` predicts whether each testing email is spam or ham.
+- The predicted labels are stored in `y_pred`.
+
+### Step 11: Performance Analysis
+
+- `confusion_matrix()` compares actual and predicted email labels.
+- `labels=["ham", "spam"]` specifies the order of classes in the matrix.
+- `cm.ravel()` extracts the four confusion matrix values.
+
+Confusion Matrix:
+
+- TN (True Negative): Legitimate ham emails correctly classified as ham.
+- FP (False Positive): Legitimate ham emails incorrectly classified as spam.
+- FN (False Negative): Spam emails incorrectly classified as ham.
+- TP (True Positive): Spam emails correctly classified as spam.
+
+Performance Metrics:
+
+- `accuracy_score(y_test, y_pred)` calculates overall classification accuracy.
+- `precision_score()` calculates the proportion of correctly predicted spam emails among all emails predicted as spam.
+- `pos_label="spam"` specifies spam as the positive class.
+- `zero_division=0` returns zero if precision cannot be calculated because there are no predicted positive samples.
+- `recall_score()` calculates sensitivity or the proportion of actual spam emails correctly identified.
+- `specificity = tn / (tn + fp)` calculates the proportion of actual ham emails correctly identified.
+- The program displays the confusion matrix and all four performance metrics.
+
+### Step 12: Test a New Email
+
+- `new_email` stores a new email message for classification.
+- `preprocess()` cleans the new email using the same preprocessing steps.
+- `vectorizer.transform()` converts the new email into the existing numerical feature format.
+- `knn.predict(email_vector)` predicts its category using the trained KNN model.
+- `prediction[0]` displays the final classification as spam or ham.
+
+## 5. Functions and Libraries Used
+
+- `requests.get()`: Downloads the dataset from the given URL.
+- `raise_for_status()`: Raises an error if the HTTP request fails.
+- `io.BytesIO()`: Creates an in-memory byte stream from downloaded content.
+- `tarfile.open()`: Opens a compressed TAR archive.
+- `extractall()`: Extracts archive contents into the specified directory.
+- `os.path.join()`: Combines folder and file names into a valid path.
+- `os.listdir()`: Returns the filenames present in a directory.
+- `os.path.isfile()`: Checks whether a path points to a file.
+- `pd.DataFrame()`: Creates a tabular dataset.
+- `df.head()`: Displays the first five records.
+- `df.shape`: Returns the number of rows and columns.
+- `value_counts()`: Counts the occurrences of unique class labels.
+- `word_tokenize()`: Divides text into individual tokens.
+- `stopwords.words()`: Returns predefined stop words.
+- `PorterStemmer()`: Creates a stemming object.
+- `ps.stem()`: Converts a word into its stem.
+- `apply()`: Applies a function to every element of a Pandas column.
+- `join()`: Combines processed words into a single string.
+- `CountVectorizer()`: Converts text into word-frequency feature vectors.
+- `fit_transform()`: Learns the vocabulary and transforms the training text into numerical features.
+- `transform()`: Converts new text using the already learned vocabulary.
+- `train_test_split()`: Divides data into training and testing sets.
+- `KNeighborsClassifier()`: Creates the KNN classification model.
+- `fit()`: Trains the KNN model using training data.
+- `predict()`: Predicts the class of new data.
+- `confusion_matrix()`: Generates a table comparing actual and predicted classes.
+- `accuracy_score()`: Calculates classification accuracy.
+- `precision_score()`: Calculates precision.
+- `recall_score()`: Calculates recall or sensitivity.
+- `ravel()`: Converts a multidimensional array into a one-dimensional array.
+
+## 6. Important Formulas and Calculations
+
+### 1. Euclidean Distance
+
+d(x,y) = √Σ(xᵢ - yᵢ)²
+
+- x and y represent two email feature vectors.
+- xᵢ and yᵢ represent their corresponding word-frequency values.
+- The distance measures how different two email vectors are.
+- Smaller distance indicates greater similarity.
+
+### 2. Accuracy
+
+Accuracy = (TP + TN) / (TP + TN + FP + FN)
+
+- Measures the proportion of correctly classified emails.
+
+### 3. Precision
+
+Precision = TP / (TP + FP)
+
+- Measures how many emails predicted as spam are actually spam.
+
+### 4. Sensitivity (Recall)
+
+Sensitivity = TP / (TP + FN)
+
+- Measures how many actual spam emails are correctly detected.
+
+### 5. Specificity
+
+Specificity = TN / (TN + FP)
+
+- Measures how many actual ham emails are correctly classified.
+
+Note:
+- TP = True Positive.
+- TN = True Negative.
+- FP = False Positive.
+- FN = False Negative.
+- In this practical, spam is considered the positive class.
+
+## 7. Program Logic and Execution Flow
+
+1. Install the required Python libraries.
+2. Import the necessary libraries and functions.
+3. Download the NLTK language resources.
+4. Download and extract the Enron1 email dataset.
+5. Read spam and ham email messages from their respective folders.
+6. Create a DataFrame containing email messages and labels.
+7. Preprocess emails using lowercase conversion, tokenization, stop word removal and stemming.
+8. Convert cleaned emails into numerical features using CountVectorizer.
+9. Split the dataset into 80% training and 20% testing data.
+10. Create a KNN classifier with five neighbours and Euclidean distance.
+11. Train the model using training data.
+12. Predict the classes of testing emails.
+13. Generate the confusion matrix.
+14. Calculate accuracy, precision, sensitivity and specificity.
+15. Preprocess and classify a new email message.
+
+## 8. Output Explanation
+
+- Dataset Download: Displays a success message after downloading and extracting the Enron1 dataset.
+- Sample Email Dataset: Displays the first five email records with their labels.
+- Dataset Shape: Displays the total number of emails and columns.
+- Class Distribution: Displays the number of spam and ham emails.
+- Preprocessed Emails: Displays cleaned email content after text preprocessing.
+- Feature Matrix Shape: Displays the number of email records and unique word features.
+- Training Data: Displays the dimensions of the 80% training dataset.
+- Testing Data: Displays the dimensions of the 20% testing dataset.
+- Email Classification Results: Displays the predicted spam or ham labels for testing emails.
+- Confusion Matrix: Displays correctly and incorrectly classified emails.
+- Accuracy: Displays the overall classification correctness.
+- Precision: Displays the correctness of spam predictions.
+- Sensitivity: Displays the percentage of actual spam emails correctly detected.
+- Specificity: Displays the percentage of legitimate emails correctly identified.
+- New Email Classification: Displays whether the given new email is classified as spam or ham.
+
+Note:
+- Actual metric values depend on the dataset and model predictions.
+- The sample email "Congratulations! You have won a free prize" is classified by the trained KNN model; its actual prediction depends on the learned feature patterns.
+
+## 9. Achievement of Objectives
+
+- Successfully implemented an email spam filtering system using the KNN algorithm.
+- Loaded and analysed the Enron1 email dataset.
+- Performed text preprocessing using tokenization, stop word removal and stemming.
+- Converted email messages into numerical feature vectors using CountVectorizer.
+- Divided the dataset into training and testing sets.
+- Trained the KNN classifier using five nearest neighbours.
+- Evaluated the model using accuracy, precision, sensitivity and specificity.
+- Successfully tested the trained model on a new email message.
+
+## 10. Important Viva Questions and Answers
+
+1. What is Email Spam Filtering?
+   - It is the process of identifying unwanted emails and separating them from legitimate emails.
+
+2. What is the KNN algorithm?
+   - K-Nearest Neighbors is a supervised machine learning algorithm that classifies data based on the majority class of its nearest neighbours.
+
+3. What is the difference between Spam and Ham?
+   - Spam refers to unwanted emails, whereas Ham refers to legitimate emails.
+
+4. Which dataset is used in this practical?
+   - The Enron1 Email Dataset is used for spam and ham classification.
+
+5. What is CountVectorizer?
+   - It converts text documents into numerical vectors based on the frequency of words.
+
+6. What is the Bag of Words model?
+   - It represents text using word occurrence counts without considering the order of words.
+
+7. Why is KNN called a lazy learning algorithm?
+   - Because it does not build an explicit model during training and performs distance calculations during prediction.
+
+8. What is the role of K in KNN?
+   - K represents the number of nearest neighbours considered during classification. In this practical, K is 5.
+
+9. What is Euclidean Distance?
+   - It measures the straight-line distance between two numerical feature vectors.
+
+10. What is a Confusion Matrix?
+    - It is a table used to compare actual and predicted class labels.
+
+11. What is the difference between Precision and Recall?
+    - Precision measures the correctness of positive predictions, whereas recall measures how many actual positive samples are correctly identified.
+
+12. What is Specificity?
+    - It measures the proportion of actual negative samples correctly classified.
+
+13. Why is `stratify=y` used in train_test_split()?
+    - It maintains the original class distribution in both training and testing datasets.
+
+14. What is the difference between fit_transform() and transform()?
+    - fit_transform() learns the vocabulary and converts text into features, whereas transform() uses the existing vocabulary to convert new text.
+
+15. Why is the same preprocessing function used for a new email?
+    - It ensures that the new email is processed in the same way as the training emails before classification.

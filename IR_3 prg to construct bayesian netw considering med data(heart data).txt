@@ -1,0 +1,410 @@
+
+# Practical 3: Bayesian Network for Heart Disease Diagnosis
+
+# Step 1: Install required libraries
+
+# Jupyter Notebook (DEFAULT)
+# %pip -q install pgmpy pandas
+
+# Google Colab (ALTERNATIVE)
+!pip -q install pgmpy pandas
+
+
+# Step 2: Import required libraries
+
+import pandas as pd
+
+from pgmpy.models import DiscreteBayesianNetwork
+from pgmpy.estimators import MaximumLikelihoodEstimator
+from pgmpy.inference import VariableElimination
+
+
+# Step 3: Load the Cleveland Heart Disease Dataset
+
+# Method 1: Jupyter Notebook (DEFAULT)
+
+url = "https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data"
+
+columns = [
+    "age", "sex", "cp", "trestbps", "chol", "fbs",
+    "restecg", "thalach", "exang", "oldpeak",
+    "slope", "ca", "thal", "heartdisease"
+]
+
+df = pd.read_csv(url, names=columns, na_values="?")
+df = df.dropna()
+
+
+# Method 2: Google Colab (ALTERNATIVE)
+
+# from google.colab import files
+# uploaded = files.upload()
+# filename = list(uploaded.keys())[0]
+# df = pd.read_csv(filename, names=columns, na_values="?")
+# df = df.dropna()
+
+
+# Step 4: Display Dataset Information
+
+print("Cleveland Heart Disease Dataset")
+print("\nFirst Five Records:")
+print(df.head())
+
+print("\nDataset Shape:")
+print(df.shape)
+
+print("\nDataset Information:")
+print(df.info())
+
+print("\nColumn Names:")
+print(df.columns)
+
+print("\nMissing Values:")
+print(df.isnull().sum())
+
+
+# Step 5: Select required variables
+
+data = df[["cp", "restecg", "heartdisease"]].astype(int)
+
+
+# Step 6: Create Bayesian Network
+
+model = DiscreteBayesianNetwork([
+    ("cp", "heartdisease"),
+    ("restecg", "heartdisease")
+])
+
+
+# Step 7: Fit the model using Maximum Likelihood Estimation
+
+estimator = MaximumLikelihoodEstimator(model, data)
+
+for cpd in estimator.get_parameters():
+    model.add_cpds(cpd)
+
+
+# Step 8: Perform inference
+
+infer = VariableElimination(model)
+
+
+# Step 9: Calculate probability of Heart Disease
+# given evidence = restecg
+
+print("Probability of Heart Disease given evidence: restecg")
+
+print(infer.query(
+    variables=["heartdisease"],
+    evidence={"restecg": 1}
+))
+
+
+# Step 10: Calculate probability of Heart Disease
+# given evidence = cp
+
+print("\nProbability of Heart Disease given evidence: cp")
+
+print(infer.query(
+    variables=["heartdisease"],
+    evidence={"cp": 2}
+))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/////////////////////////////////////////////////
+
+
+
+# PRACTICAL NO. 3: BAYESIAN NETWORK FOR HEART DISEASE DIAGNOSIS
+
+## 1. Aim
+
+- To construct a Bayesian Network using medical data and demonstrate heart disease diagnosis using the Cleveland Heart Disease Dataset.
+- The practical uses probability theory to calculate the likelihood of heart disease based on medical evidence such as chest pain type and resting ECG results.
+
+## 2. Objectives
+
+- To evaluate and analyse retrieved information.
+- To study the Bayesian Network model.
+- To understand the relationship between medical variables using conditional probabilities.
+- To perform probabilistic inference for heart disease diagnosis.
+
+## 3. Theory and Important Concepts
+
+- Bayesian Network: It is a probabilistic graphical model that represents relationships between variables using a directed acyclic graph (DAG).
+- Directed Acyclic Graph (DAG): A graph containing directed edges without any circular path.
+- Nodes: Represent random variables such as chest pain, resting ECG and heart disease.
+- Edges: Represent conditional dependencies between variables.
+- Conditional Probability: It represents the probability of an event occurring when another event is already known.
+- Conditional Probability Table (CPT): Stores the probabilities of a variable for different combinations of its parent variables.
+- Bayesian Inference: It calculates the probability of an unknown variable using available evidence.
+- Maximum Likelihood Estimation (MLE): Estimates probabilities from observed dataset values by calculating their frequency.
+- Variable Elimination: An inference technique that calculates probabilities by eliminating unnecessary variables from the network.
+- Evidence: Known information provided to calculate the probability of another variable.
+- Cleveland Heart Disease Dataset: A medical dataset containing patient information and attributes related to heart disease.
+
+Important Dataset Attributes Used:
+
+- cp: Represents chest pain type.
+- restecg: Represents resting electrocardiographic results.
+- heartdisease: Represents the heart disease diagnosis or severity level.
+
+Bayesian Network Structure:
+
+- cp → heartdisease
+- restecg → heartdisease
+
+Here:
+- Chest pain type and resting ECG are parent nodes.
+- Heart disease is the child node.
+- Both medical attributes influence the probability distribution of heart disease.
+
+Important Formula:
+
+Bayes' Theorem:
+
+P(A|B) = P(B|A) × P(A) / P(B)
+
+- P(A|B): Probability of event A given evidence B.
+- P(B|A): Probability of evidence B when event A occurs.
+- P(A): Prior probability of event A.
+- P(B): Probability of the evidence.
+
+The Bayesian Network uses conditional probability distributions to calculate the probability of heart disease based on the available evidence.
+
+## 4. Code Explanation
+
+### Step 1: Install Required Libraries
+
+- `pgmpy` is installed for creating and performing inference on Bayesian Networks.
+- `pandas` is installed for loading and handling the medical dataset.
+- The active installation command uses `!pip -q install pgmpy pandas`, suitable for Google Colab.
+
+### Step 2: Import Required Libraries
+
+- `pandas`: Used for loading and processing the dataset.
+- `DiscreteBayesianNetwork`: Creates a Bayesian Network containing discrete variables.
+- `MaximumLikelihoodEstimator`: Estimates conditional probabilities from the dataset.
+- `VariableElimination`: Performs probabilistic inference on the Bayesian Network.
+
+### Step 3: Load the Cleveland Heart Disease Dataset
+
+- The dataset is loaded directly from the UCI Machine Learning Repository using its URL.
+- `columns` contains the names of all 14 dataset attributes.
+- `pd.read_csv()` reads the dataset and stores it in a DataFrame named `df`.
+- `names=columns` assigns column names to the dataset.
+- `na_values="?"` identifies question marks as missing values.
+- `df.dropna()` removes records containing missing values.
+
+Google Colab Alternative:
+- `files.upload()` allows the user to upload the dataset manually.
+- `list(uploaded.keys())[0]` retrieves the uploaded filename.
+- `pd.read_csv()` loads the uploaded dataset.
+- Only one dataset-loading method should be used at a time.
+
+### Step 4: Display Dataset Information
+
+- `df.head()` displays the first five records.
+- `df.shape` displays the number of rows and columns.
+- `df.info()` displays column names, data types and non-null counts.
+- `df.columns` displays all column names.
+- `df.isnull().sum()` displays the number of missing values in each column.
+- These operations help understand and verify the dataset before model creation.
+
+### Step 5: Select Required Variables
+
+- `df[["cp", "restecg", "heartdisease"]]` selects only three required columns.
+- `astype(int)` converts their values into integer data types.
+- The selected data is stored in the variable `data`.
+- These variables are used to construct the Bayesian Network.
+
+### Step 6: Create Bayesian Network
+
+- `DiscreteBayesianNetwork()` creates the Bayesian Network model.
+- `("cp", "heartdisease")` creates a directed edge from chest pain to heart disease.
+- `("restecg", "heartdisease")` creates a directed edge from resting ECG to heart disease.
+- Both variables are connected to heart disease as parent nodes.
+
+### Step 7: Fit the Model Using Maximum Likelihood Estimation
+
+- `MaximumLikelihoodEstimator(model, data)` estimates the conditional probability distributions from the dataset.
+- `estimator.get_parameters()` retrieves the estimated probability distributions.
+- The `for` loop processes each Conditional Probability Distribution (CPD).
+- `model.add_cpds(cpd)` adds the estimated probability distributions to the Bayesian Network.
+- This step trains the network using the available medical data.
+
+### Step 8: Perform Inference
+
+- `VariableElimination(model)` creates an inference object.
+- It is used to calculate probabilities based on the evidence provided.
+- The inference object is stored in the variable `infer`.
+
+### Step 9: Calculate Probability of Heart Disease Given Evidence = restecg
+
+- `infer.query()` performs probabilistic inference.
+- `variables=["heartdisease"]` specifies the variable whose probability needs to be calculated.
+- `evidence={"restecg": 1}` provides resting ECG value 1 as known evidence.
+- The program calculates the probability distribution of heart disease for this evidence.
+- The result is displayed using `print()`.
+
+### Step 10: Calculate Probability of Heart Disease Given Evidence = cp
+
+- `infer.query()` performs another probability calculation.
+- `variables=["heartdisease"]` specifies the target variable.
+- `evidence={"cp": 2}` provides chest pain type 2 as evidence.
+- The program calculates the probability distribution of heart disease for this evidence.
+- The result is displayed using `print()`.
+
+## 5. Functions and Libraries Used
+
+- `pandas`: Python library used for data loading and manipulation.
+- `pd.read_csv()`: Reads a CSV dataset and converts it into a DataFrame.
+- `df.dropna()`: Removes rows containing missing values.
+- `df.head()`: Displays the first five records.
+- `df.shape`: Returns the number of rows and columns.
+- `df.info()`: Displays dataset structure and data types.
+- `df.columns`: Returns the column names.
+- `df.isnull().sum()`: Counts missing values in each column.
+- `astype(int)`: Converts selected columns into integer data types.
+- `DiscreteBayesianNetwork()`: Creates a discrete Bayesian Network using directed edges.
+- `MaximumLikelihoodEstimator()`: Estimates probability distributions from observed data.
+- `get_parameters()`: Retrieves estimated conditional probability distributions.
+- `add_cpds()`: Adds conditional probability distributions to the network.
+- `VariableElimination()`: Creates an inference object for probability calculations.
+- `infer.query()`: Calculates the probability distribution of the required variable given evidence.
+- `variables`: Specifies the variable whose probability is required.
+- `evidence`: Specifies the known variable and its observed value.
+
+## 6. Important Formulas and Calculations
+
+### Bayes' Theorem
+
+P(A|B) = P(B|A) × P(A) / P(B)
+
+- P(A|B) represents the probability of heart disease given medical evidence.
+- P(B|A) represents the probability of observing the medical evidence when heart disease is present.
+- P(A) represents the prior probability of heart disease.
+- P(B) represents the probability of the observed evidence.
+
+### Maximum Likelihood Estimation
+
+P(X = x) = Count(X = x) / Total Observations
+
+- Count(X = x) represents the number of times a particular value occurs.
+- Total Observations represents the total number of records.
+- MLE estimates probabilities using the frequency of values in the dataset.
+
+### Conditional Probability
+
+P(Heart Disease | cp, restecg)
+
+- Represents the probability of heart disease given chest pain type and resting ECG.
+- The Bayesian Network uses conditional probability distributions to represent these relationships.
+
+Note:
+- The program uses MLE to estimate the probability distributions and Variable Elimination to calculate the required probabilities.
+- The code performs two separate inference queries using different evidence variables.
+
+## 7. Program Logic and Execution Flow
+
+1. Install pgmpy and pandas libraries.
+2. Import the required libraries and Bayesian Network classes.
+3. Load the Cleveland Heart Disease Dataset.
+4. Remove records containing missing values.
+5. Display dataset information and verify its structure.
+6. Select cp, restecg and heartdisease attributes.
+7. Create a Bayesian Network with two directed edges.
+8. Estimate conditional probability distributions using MLE.
+9. Add the estimated distributions to the network.
+10. Create an inference object using Variable Elimination.
+11. Calculate heart disease probabilities using resting ECG as evidence.
+12. Calculate heart disease probabilities using chest pain type as evidence.
+13. Display both probability distributions.
+
+## 8. Output Explanation
+
+- Dataset Information: Displays the first five records, dataset dimensions, column names, data types and missing value counts.
+- Selected Variables: The model uses chest pain type, resting ECG and heart disease attributes.
+- Bayesian Network: The model contains two parent variables, cp and restecg, connected to heartdisease.
+- Maximum Likelihood Estimation: Calculates the conditional probability distributions from the medical dataset.
+- First Inference Output: Displays the probability distribution of heart disease when restecg = 1.
+- Second Inference Output: Displays the probability distribution of heart disease when cp = 2.
+
+Important:
+- The heartdisease attribute contains values from 0 to 4 in the Cleveland dataset.
+- Value 0 indicates no heart disease, while values 1 to 4 represent different levels of disease presence.
+- The inference output contains probabilities for these possible values.
+- Actual probability values depend on the dataset records and estimated distributions.
+
+## 9. Achievement of Objectives
+
+- Successfully studied the concepts of Bayesian Networks and probabilistic graphical models.
+- Loaded and analysed the Cleveland Heart Disease Dataset.
+- Selected relevant medical attributes for the model.
+- Created a Bayesian Network representing the relationship between chest pain, resting ECG and heart disease.
+- Estimated conditional probability distributions using Maximum Likelihood Estimation.
+- Performed probabilistic inference using Variable Elimination.
+- Calculated heart disease probability distributions using different medical evidence.
+
+## 10. Important Viva Questions and Answers
+
+1. What is a Bayesian Network?
+   - It is a probabilistic graphical model that represents relationships between variables using a directed acyclic graph.
+
+2. What is a DAG?
+   - DAG stands for Directed Acyclic Graph. It is a directed graph that contains no cycles.
+
+3. What are nodes and edges in a Bayesian Network?
+   - Nodes represent random variables, while edges represent conditional dependencies between variables.
+
+4. What is Bayes' Theorem?
+   - It is a mathematical formula used to calculate the probability of an event based on available evidence.
+
+5. What is Maximum Likelihood Estimation?
+   - MLE is a statistical method used to estimate probabilities from observed data.
+
+6. What is a Conditional Probability Distribution?
+   - It represents the probability of a variable for different values of its parent variables.
+
+7. What is Variable Elimination?
+   - It is an inference algorithm that calculates probability distributions by eliminating unnecessary variables.
+
+8. Which dataset is used in this practical?
+   - The Cleveland Heart Disease Dataset from the UCI Machine Learning Repository.
+
+9. Why are cp and restecg selected?
+   - They represent chest pain type and resting ECG results, which are used as evidence for calculating heart disease probabilities.
+
+10. What is evidence in a Bayesian Network?
+    - Evidence is the known value of a variable used to calculate the probability of another variable.
+
+11. What is the role of pgmpy?
+    - It is a Python library used to create, train and perform inference on probabilistic graphical models.
+
+12. What is the difference between a prior probability and a posterior probability?
+    - Prior probability is calculated before considering new evidence, whereas posterior probability is calculated after considering the evidence.
